@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoSec-Patch: Autonomous Co-Evolution SecOps Cockpit</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --surface: #111827;
+            --border: #1f2937;
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+        body {
+            margin: 0;
+            padding: 2rem;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .title h1 { margin: 0; font-size: 1.8rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .title p { margin: 0.3rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
+        .metrics { display: flex; gap: 1.5rem; }
+        .metric-box {
+            background: var(--surface);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .metric-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem;
+            background: #161f30;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-body { padding: 1.2rem; }
+        .badge { padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .cwe-badge { background: #374151; color: #fbbf24; margin-right: 0.5rem; }
+        .rule-title { font-weight: 600; font-size: 1.05rem; }
+        .file-path { color: var(--text-muted); font-size: 0.9rem; }
+        .finding-msg { font-size: 0.95rem; line-height: 1.5; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag { background: #1f2937; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #60a5fa; }
+        .code-block {
+            background: #030712;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #34d399;
+        }
+        .timeline-container { display: flex; gap: 1rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .timeline-step {
+            background: #0b1120;
+            border: 1px solid var(--border);
+            padding: 0.7rem;
+            border-radius: 6px;
+            min-width: 220px;
+        }
+        .agent-badge { font-weight: 600; font-size: 0.8rem; color: #f472b6; }
+        .model-badge { font-size: 0.7rem; color: var(--text-muted); display: block; }
+        .step-tokens { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">
+            <h1>AutoSec-Patch Co-Evolution Cockpit</h1>
+            <p>Adversarial Red/Blue Multi-Agent Remediation via Nebius Token Factory & NVIDIA Nemotron</p>
+        </div>
+        <div class="metrics">
+            <div class="metric-box">
+                <div class="metric-val">3</div>
+                <div class="metric-label">Findings</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-val">100%</div>
+                <div class="metric-label">Immunity Rate</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-val">Nebius Cloud</div>
+                <div class="metric-label">Inference Engine</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="findings-list">
+        
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <span class="badge cwe-badge">CWE-89</span>
+                    <span class="rule-title">rules.python.security.sqli</span>
+                </div>
+                <span class="badge status-badge" style="background: #10b98122; color: #10b981; border: 1px solid #10b981;">
+                    VERIFIED IMMUNE
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="file-path">📁 <code>examples/vulnerable_app.py:13</code></p>
+                <p class="finding-msg">Raw SQL query formatted with user input leading to full SQL Injection.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <h4>⚡ Blast Radius Impacted Nodes</h4>
+                        <div class="tag-container">
+                            <span class="tag">get_user_vulnerable</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>🔄 Co-Evolution Loop</h4>
+                        <p>Iterations: <strong>1</strong> | Self-Healing: <strong>Active</strong></p>
+                    </div>
+                </div>
+
+                <h4>🛡️ Synthesized Invariant-Preserving Diff</h4>
+                <pre class="code-block"><code>--- a/vulnerable.py
++++ b/vulnerable.py
+@@ -10,2 +10,2 @@
+-    query = f"SELECT * FROM users WHERE username = '{username}'"
++    query = "SELECT * FROM users WHERE username = ?"</code></pre>
+
+                <h4>🤖 Swarm Orchestration Timeline</h4>
+                <div class="timeline-container">
+                    
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">RedTeam-ExploitSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 510</div>
+            </div>
+            
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">BlueTeam-PatchSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 381</div>
+            </div>
+            
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <span class="badge cwe-badge">CWE-78</span>
+                    <span class="rule-title">rules.python.security.cmdi</span>
+                </div>
+                <span class="badge status-badge" style="background: #10b98122; color: #10b981; border: 1px solid #10b981;">
+                    VERIFIED IMMUNE
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="file-path">📁 <code>examples/enterprise_bench/vulnerable_services.py:6</code></p>
+                <p class="finding-msg">Subprocess called with shell=True and untrusted user input string interpolation.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <h4>⚡ Blast Radius Impacted Nodes</h4>
+                        <div class="tag-container">
+                            <span class="tag">execute_system_command</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>🔄 Co-Evolution Loop</h4>
+                        <p>Iterations: <strong>1</strong> | Self-Healing: <strong>Active</strong></p>
+                    </div>
+                </div>
+
+                <h4>🛡️ Synthesized Invariant-Preserving Diff</h4>
+                <pre class="code-block"><code>--- a/vulnerable.py
++++ b/vulnerable.py
+@@ -10,2 +10,2 @@
+-    query = f"SELECT * FROM users WHERE username = '{username}'"
++    query = "SELECT * FROM users WHERE username = ?"</code></pre>
+
+                <h4>🤖 Swarm Orchestration Timeline</h4>
+                <div class="timeline-container">
+                    
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">RedTeam-ExploitSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 332</div>
+            </div>
+            
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">BlueTeam-PatchSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 294</div>
+            </div>
+            
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <span class="badge cwe-badge">CWE-22</span>
+                    <span class="rule-title">rules.python.security.pathtraversal</span>
+                </div>
+                <span class="badge status-badge" style="background: #10b98122; color: #10b981; border: 1px solid #10b981;">
+                    VERIFIED IMMUNE
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="file-path">📁 <code>examples/enterprise_bench/vulnerable_services.py:14</code></p>
+                <p class="finding-msg">Unvalidated path parameter joined with base directory allows directory traversal.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <h4>⚡ Blast Radius Impacted Nodes</h4>
+                        <div class="tag-container">
+                            <span class="tag">read_user_file</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>🔄 Co-Evolution Loop</h4>
+                        <p>Iterations: <strong>1</strong> | Self-Healing: <strong>Active</strong></p>
+                    </div>
+                </div>
+
+                <h4>🛡️ Synthesized Invariant-Preserving Diff</h4>
+                <pre class="code-block"><code>--- a/vulnerable.py
++++ b/vulnerable.py
+@@ -10,2 +10,2 @@
+-    query = f"SELECT * FROM users WHERE username = '{username}'"
++    query = "SELECT * FROM users WHERE username = ?"</code></pre>
+
+                <h4>🤖 Swarm Orchestration Timeline</h4>
+                <div class="timeline-container">
+                    
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">RedTeam-ExploitSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 328</div>
+            </div>
+            
+            <div class="timeline-step">
+                <div class="step-header">
+                    <span class="agent-badge">BlueTeam-PatchSynthesizer</span>
+                    <span class="model-badge">nvidia/llama-3.1-nemotron-70b-instruct</span>
+                </div>
+                <div class="step-tokens">Tokens: 295</div>
+            </div>
+            
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

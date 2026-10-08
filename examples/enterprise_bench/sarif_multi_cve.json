@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Semgrep-Enterprise",
+          "rules": [
+            {
+              "id": "rules.python.security.sqli",
+              "properties": { "tags": ["CWE-89", "Critical"] }
+            },
+            {
+              "id": "rules.python.security.cmdi",
+              "properties": { "tags": ["CWE-78", "Critical"] }
+            },
+            {
+              "id": "rules.python.security.pathtraversal",
+              "properties": { "tags": ["CWE-22", "High"] }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "rules.python.security.sqli",
+          "message": { "text": "Raw SQL query formatted with user input leading to full SQL Injection." },
+          "locations": [{
+            "physicalLocation": {
+              "artifactLocation": { "uri": "examples/vulnerable_app.py" },
+              "region": { "startLine": 13, "endLine": 14 }
+            }
+          }]
+        },
+        {
+          "ruleId": "rules.python.security.cmdi",
+          "message": { "text": "Subprocess called with shell=True and untrusted user input string interpolation." },
+          "locations": [{
+            "physicalLocation": {
+              "artifactLocation": { "uri": "examples/enterprise_bench/vulnerable_services.py" },
+              "region": { "startLine": 6, "endLine": 8 }
+            }
+          }]
+        },
+        {
+          "ruleId": "rules.python.security.pathtraversal",
+          "message": { "text": "Unvalidated path parameter joined with base directory allows directory traversal." },
+          "locations": [{
+            "physicalLocation": {
+              "artifactLocation": { "uri": "examples/enterprise_bench/vulnerable_services.py" },
+              "region": { "startLine": 14, "endLine": 16 }
+            }
+          }]
+        }
+      ]
+    }
+  ]
+}

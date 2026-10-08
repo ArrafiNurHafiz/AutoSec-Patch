@@ -1,78 +1,38 @@
 import os
 import sys
 import click
-from autosec.parser import parse_sarif_or_json
-from autosec.client import NebiusNemotronClient
-from autosec.patcher import NemotronPatcher
-from autosec.runner import apply_patch, run_tests
+from autosec.engine import CoEvolutionEngine
+from autosec.reporter import generate_interactive_html_dashboard
 
 @click.group()
 def main():
-    """AutoSec-Patch: Autonomous CVE Remediation Agent."""
+    """AutoSec-Patch: Next-Gen Autonomous SecOps Co-Evolution Swarm."""
     pass
 
 @main.command()
-@click.option("--sarif", "-s", required=True, help="Path to SARIF / SAST JSON report file.")
-@click.option("--repo", "-r", default=".", help="Root path of target repository.")
-@click.option("--test-cmd", "-t", default="pytest", help="Regression test command.")
-@click.option("--model", "-m", default=None, help="NVIDIA Nemotron model identifier on Nebius.")
-@click.option("--auto-heal/--no-auto-heal", default=True, help="Enable self-healing retry on test failure.")
-def remediate(sarif: str, repo: str, test_cmd: str, model: str, auto_heal: bool):
-    """Scan report, generate Nemotron patch, and verify with tests."""
-    repo_path = os.path.abspath(repo)
-    click.echo(f"[*] Parsing security findings from: {sarif}")
-    findings = parse_sarif_or_json(sarif)
+@click.option("--sarif", "-s", required=True, help="Path to SARIF / SAST finding report.")
+@click.option("--repo", "-r", default=".", help="Target codebase repository root.")
+@click.option("--test-cmd", "-t", default="python3 -m unittest examples/test_vulnerable.py", help="Regression test command.")
+@click.option("--max-iterations", "-i", default=3, help="Max Red-Blue co-evolution rounds.")
+@click.option("--report", "-o", default="dashboard.html", help="Path for interactive HTML cockpit report.")
+def remediate(sarif: str, repo: str, test_cmd: str, max_iterations: int, report: str):
+    """Execute autonomous co-evolution remediation swarm."""
+    click.echo("=" * 65)
+    click.echo("  🛡️  AUTOSEC-PATCH: CO-EVOLUTION SECOPS SWARM  🛡️")
+    click.echo("  Powered by Nebius Token Factory & NVIDIA Nemotron")
+    click.echo("=" * 65)
 
-    if not findings:
-        click.echo("[+] No actionable security findings detected.")
-        sys.exit(0)
+    engine = CoEvolutionEngine(repo_path=repo, max_iterations=max_iterations)
+    results = engine.process_sarif(sarif, test_cmd=test_cmd)
 
-    click.echo(f"[+] Loaded {len(findings)} finding(s). Initializing Nebius Nemotron Engine...")
-    client = NebiusNemotronClient(model=model) if model else NebiusNemotronClient()
-    patcher = NemotronPatcher(client)
+    click.echo(f"\n[+] Evaluated {len(results)} vulnerability finding(s).")
+    for r in results:
+        status = "✅ IMMUNE" if (r.verified_secure and r.regression_passed) else "❌ FAILED"
+        click.echo(f"  • {r.finding.rule_id} ({r.finding.cwe}): {status} [{r.iterations} iteration(s)]")
 
-    for idx, finding in enumerate(findings, 1):
-        target_file = os.path.join(repo_path, finding.file_path)
-        click.echo(f"\n--- Processing Finding [{idx}/{len(findings)}]: {finding.rule_id} ---")
-        click.echo(f"    Target: {finding.file_path}:{finding.start_line}")
-        click.echo(f"    Detail: {finding.message}")
-
-        if not os.path.exists(target_file):
-            click.echo(f"[!] Target file not found: {target_file}. Skipping.")
-            continue
-
-        with open(target_file, "r", encoding="utf-8") as f:
-            source_code = f.read()
-
-        click.echo("[*] Requesting patch from NVIDIA Nemotron (Nebius Token Factory)...")
-        patch_diff = patcher.generate_patch(finding, source_code)
-        click.echo(f"[+] Generated Diff:\n{patch_diff}\n")
-
-        click.echo("[*] Applying patch...")
-        success, msg = apply_patch(repo_path, patch_diff)
-        if not success:
-            click.echo(f"[!] Failed to apply patch: {msg}")
-            continue
-
-        click.echo(f"[*] Running regression test suite ({test_cmd})...")
-        passed, test_out = run_tests(repo_path, test_cmd)
-        if passed:
-            click.echo(f"[SUCCESS] Security vulnerability {finding.rule_id} fixed and all regression tests passed!")
-        else:
-            click.echo(f"[FAIL] Regression tests failed after patch.")
-            if auto_heal:
-                click.echo("[*] Initiating Self-Healing feedback loop to Nemotron...")
-                healed_diff = patcher.heal_patch(finding, source_code, test_out)
-                click.echo(f"[+] Healed Diff:\n{healed_diff}\n")
-                success_heal, msg_heal = apply_patch(repo_path, healed_diff)
-                if success_heal:
-                    passed_heal, _ = run_tests(repo_path, test_cmd)
-                    if passed_heal:
-                        click.echo(f"[SUCCESS] Self-healed patch passed all tests!")
-                    else:
-                        click.echo("[!] Self-healing attempt still failed regression.")
-            else:
-                click.echo("[!] Auto-heal disabled. Manual inspection required.")
+    # Generate Cockpit
+    report_file = generate_interactive_html_dashboard(results, output_path=report)
+    click.echo(f"\n[+] Interactive SecOps Cockpit Report generated: {os.path.abspath(report_file)}")
 
 if __name__ == "__main__":
     main()
