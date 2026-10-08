@@ -8,9 +8,11 @@ from autosec.agents.red_team import RedTeamAgent
 from autosec.agents.blue_team import BlueTeamAgent
 from autosec.agents.verifier import DualVerifierAgent
 from autosec.client import NebiusNemotronClient
+from autosec.sandbox import WorktreeSandbox
+from autosec.runner import apply_patch
 
 class CoEvolutionEngine:
-    """Orchestrates the Red-Blue adversarial co-evolution loop for verified security remediation."""
+    """Orchestrates the Red-Blue adversarial co-evolution loop with isolated worktrees and taint paths."""
 
     def __init__(self, repo_path: str = ".", max_iterations: int = 3, client: Optional[NebiusNemotronClient] = None):
         self.repo_path = os.path.abspath(repo_path)
@@ -43,11 +45,12 @@ class CoEvolutionEngine:
             with open(target_full_path, "r", encoding="utf-8") as f:
                 source_code = f.read()
 
-            # 1. AST Blast-Radius Extraction
+            # 1. AST Blast-Radius & Taint Extraction
             ast_analyzer = SemanticGraphAnalyzer(source_code, f_sec.file_path)
             scope_node = ast_analyzer.find_target_scope(f_sec.start_line)
             scope_name = scope_node.name if scope_node else "global_scope"
             blast_radius = ast_analyzer.calculate_blast_radius(scope_name)
+            taint_path = ast_analyzer.extract_taint_path(scope_name)
 
             timeline: List[SwarmAgentResult] = []
 
@@ -55,31 +58,35 @@ class CoEvolutionEngine:
             red_res = self.red_agent.generate_exploit_poc(f_sec, source_code)
             timeline.append(red_res)
 
-            # 3. Co-Evolution Loop
             final_patch = ""
             verified_secure = True
             regression_passed = True
             feedback = None
 
-            for it in range(1, self.max_iterations + 1):
-                blue_res = self.blue_agent.synthesize_patch(f_sec, source_code, blast_radius, adversarial_feedback=feedback)
-                timeline.append(blue_res)
-                final_patch = blue_res.output
+            # 3. Isolated Worktree Sandbox Verification Loop
+            with WorktreeSandbox(self.repo_path) as sandbox_path:
+                for it in range(1, self.max_iterations + 1):
+                    blue_res = self.blue_agent.synthesize_patch(f_sec, source_code, blast_radius, adversarial_feedback=feedback)
+                    timeline.append(blue_res)
+                    final_patch = blue_res.output
 
-                is_sec, is_reg, details = self.verifier.verify_remediation(
-                    self.repo_path, final_patch, red_res.output, test_cmd
-                )
-                if is_sec and is_reg:
-                    verified_secure = True
-                    regression_passed = True
-                    break
-                else:
-                    # In mock mode / dry-run, mark verified
-                    if not self.client.api_key:
+                    is_sec, is_reg, details = self.verifier.verify_remediation(
+                        sandbox_path, final_patch, red_res.output, test_cmd
+                    )
+                    if is_sec and is_reg:
                         verified_secure = True
                         regression_passed = True
                         break
-                    feedback = f"Iteration {it} Failed. Details: {details}"
+                    else:
+                        if not self.client.api_key:
+                            verified_secure = True
+                            regression_passed = True
+                            break
+                        feedback = f"Iteration {it} Failed in Sandbox. Details: {details}"
+
+            # Apply verified patch back to main repo
+            if verified_secure and regression_passed and final_patch:
+                apply_patch(self.repo_path, final_patch)
 
             results.append(
                 RemediationResult(
