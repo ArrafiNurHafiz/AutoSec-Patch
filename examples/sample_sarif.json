@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Semgrep",
+          "rules": [
+            {
+              "id": "python.lang.security.audit.sqli.sqlite-cursor-execute",
+              "properties": {
+                "tags": [
+                  "CWE-89",
+                  "security",
+                  "sql-injection"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "python.lang.security.audit.sqli.sqlite-cursor-execute",
+          "message": {
+            "text": "Detected direct string formatting in SQL query execution. This creates a SQL Injection vulnerability (CWE-89)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable_app.py"
+                },
+                "region": {
+                  "startLine": 13,
+                  "endLine": 14,
+                  "snippet": {
+                    "text": "    query = f\"SELECT id, username, role FROM users WHERE username = '{username}'\""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
