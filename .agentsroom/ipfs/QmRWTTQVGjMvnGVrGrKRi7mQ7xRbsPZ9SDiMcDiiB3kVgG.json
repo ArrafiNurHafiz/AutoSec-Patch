@@ -1,0 +1,480 @@
+{
+  "audit_findings": [
+    {
+      "confidence": 0.92,
+      "evidence": {
+        "delta_ppm": 191.59,
+        "neighbor_mean_co2": 418.91,
+        "neighbors_count": 4,
+        "target_co2": 610.5
+      },
+      "explanation": "Station STN-COAS-015 reported CO2=610.5 ppm, diverging drastically from 4 spatial neighbors (mean=418.9 ppm).",
+      "metric_impacted": "co2_ppm",
+      "rule_name": "SPATIAL_NEIGHBORHOOD_DIVERGENCE",
+      "severity": "HIGH",
+      "station_id": "STN-COAS-015"
+    },
+    {
+      "confidence": 0.96,
+      "evidence": {
+        "reported_ch4": 2267.549593127472,
+        "reported_co2": 412.9126278393448,
+        "reported_pm25": 41.744823432434224
+      },
+      "explanation": "Physical decoupling detected: Station STN-INDU-001 claims low CO2 (412.9 ppm) despite severe combustion markers (PM2.5=41.7 ug/m3, CH4=2267.5 ppb). High probability of carbon tax evasion through fraudulent telemetry clipping.",
+      "metric_impacted": "co2_ppm",
+      "rule_name": "COMBUSTION_DECOUPLING_UNDER_REPORTING",
+      "severity": "CRITICAL",
+      "station_id": "STN-INDU-001"
+    },
+    {
+      "confidence": 0.88,
+      "evidence": {
+        "metrics": {
+          "attack_injected": "synthetic_flatline",
+          "ch4_ppb": 1900.0,
+          "co2_ppm": 420.0,
+          "humidity_pct": 50.0,
+          "latitude": 40.69875,
+          "longitude": -74.01819,
+          "metadata": {
+            "cluster": "INDUSTRIAL_ZONE_NORTH",
+            "is_simulated": true,
+            "tamper_reason": "Synthetic zero-variance mock payload"
+          },
+          "pm25_ugm3": 15.0,
+          "raw_signature": null,
+          "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+          "station_id": "STN-INDU-002",
+          "temperature_c": 22.0,
+          "timestamp": 1791557677
+        }
+      },
+      "explanation": "Telemetry from STN-INDU-002 exhibits zero entropy and exact rounded integers across 5 sensors. Physical sensors in atmosphere always display micro-fluctuation noise.",
+      "metric_impacted": "all_metrics",
+      "rule_name": "SYNTHETIC_ZERO_ENTROPY_PAYLOAD",
+      "severity": "HIGH",
+      "station_id": "STN-INDU-002"
+    }
+  ],
+  "epoch_id": "EPOCH-1791557663",
+  "findings_count": 3,
+  "integrity_score": 0.8,
+  "merkle_root": "0x1aee76139132195c08ca51a40283f3cbe37670344e72bc031fb63a15f420386d",
+  "schema": "ClimateTrust-Epoch-v1",
+  "timestamp": 1791557663,
+  "verified_count": 12,
+  "verified_telemetry": [
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 2225.79,
+      "co2_ppm": 513.06,
+      "humidity_pct": 48.7,
+      "latitude": 40.71415,
+      "longitude": -74.01439,
+      "metadata": {
+        "cluster": "INDUSTRIAL_ZONE_NORTH",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 45.62,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-INDU-003",
+      "temperature_c": 23.83,
+      "timestamp": 1791557642
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 2269.57,
+      "co2_ppm": 516.11,
+      "humidity_pct": 50.2,
+      "latitude": 40.70426,
+      "longitude": -73.9981,
+      "metadata": {
+        "cluster": "INDUSTRIAL_ZONE_NORTH",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 43.17,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-INDU-004",
+      "temperature_c": 23.5,
+      "timestamp": 1791557649
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 2234.83,
+      "co2_ppm": 508.21,
+      "humidity_pct": 50.13,
+      "latitude": 40.72201,
+      "longitude": -73.99911,
+      "metadata": {
+        "cluster": "INDUSTRIAL_ZONE_NORTH",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 40.17,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-INDU-005",
+      "temperature_c": 24.23,
+      "timestamp": 1791557688
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1983.33,
+      "co2_ppm": 439.51,
+      "humidity_pct": 44.83,
+      "latitude": 40.75475,
+      "longitude": -73.99433,
+      "metadata": {
+        "cluster": "URBAN_METRO_CORE",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 25.25,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-URBA-006",
+      "temperature_c": 24.0,
+      "timestamp": 1791557687
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1984.98,
+      "co2_ppm": 443.88,
+      "humidity_pct": 49.43,
+      "latitude": 40.75088,
+      "longitude": -73.99707,
+      "metadata": {
+        "cluster": "URBAN_METRO_CORE",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 22.73,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-URBA-007",
+      "temperature_c": 24.15,
+      "timestamp": 1791557692
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1929.56,
+      "co2_ppm": 448.43,
+      "humidity_pct": 50.81,
+      "latitude": 40.76441,
+      "longitude": -73.99796,
+      "metadata": {
+        "cluster": "URBAN_METRO_CORE",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 22.15,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-URBA-008",
+      "temperature_c": 23.81,
+      "timestamp": 1791557650
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1936.7,
+      "co2_ppm": 438.6,
+      "humidity_pct": 49.19,
+      "latitude": 40.77359,
+      "longitude": -73.9809,
+      "metadata": {
+        "cluster": "URBAN_METRO_CORE",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 25.91,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-URBA-009",
+      "temperature_c": 23.07,
+      "timestamp": 1791557653
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1977.65,
+      "co2_ppm": 446.14,
+      "humidity_pct": 48.12,
+      "latitude": 40.75593,
+      "longitude": -73.99811,
+      "metadata": {
+        "cluster": "URBAN_METRO_CORE",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 22.66,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-URBA-010",
+      "temperature_c": 23.72,
+      "timestamp": 1791557664
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1825.01,
+      "co2_ppm": 414.59,
+      "humidity_pct": 48.98,
+      "latitude": 40.59907,
+      "longitude": -74.13776,
+      "metadata": {
+        "cluster": "COASTAL_BASELINE_PARK",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 9.05,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-COAS-011",
+      "temperature_c": 24.44,
+      "timestamp": 1791557690
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1833.64,
+      "co2_ppm": 423.95,
+      "humidity_pct": 49.24,
+      "latitude": 40.60471,
+      "longitude": -74.15434,
+      "metadata": {
+        "cluster": "COASTAL_BASELINE_PARK",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 8.98,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-COAS-012",
+      "temperature_c": 22.95,
+      "timestamp": 1791557688
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1794.73,
+      "co2_ppm": 419.23,
+      "humidity_pct": 50.98,
+      "latitude": 40.59049,
+      "longitude": -74.14638,
+      "metadata": {
+        "cluster": "COASTAL_BASELINE_PARK",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 10.81,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-COAS-013",
+      "temperature_c": 23.98,
+      "timestamp": 1791557668
+    },
+    {
+      "attack_injected": "none",
+      "ch4_ppb": 1813.08,
+      "co2_ppm": 417.87,
+      "humidity_pct": 48.86,
+      "latitude": 40.61302,
+      "longitude": -74.16486,
+      "metadata": {
+        "cluster": "COASTAL_BASELINE_PARK",
+        "is_simulated": true
+      },
+      "pm25_ugm3": 6.02,
+      "raw_signature": null,
+      "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge",
+      "station_id": "STN-COAS-014",
+      "temperature_c": 23.41,
+      "timestamp": 1791557674
+    }
+  ],
+  "zero_knowledge_proofs": [
+    {
+      "challenge": "0x6a0266fe5d0436819bc27581fc80a7e4f06141cc718238dfc6c2a4aeede0a7c3",
+      "commitment_hash": "0x7d79efa9db0bf3e505b6f30b53975b16ef5c4d4d59635ddf66e2bdcf447ef215",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0xf26ca26c0e0e9b28a5f959eb0ee6364108bae4f98d4880f249277568a74ed2bc",
+      "proof_pi_b": "0x2b65e38596d0b2421daada12b52761cb1eca503fc0e3e9487c0f922aa80e1c34",
+      "proof_pi_c": "0x93090edfdae9b12e2d266abe38d61ec933322b20bc4194f28acae6f88cb6e23c",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0x50764213ddcd1752cf9a2e1de97d8c35aa375d3634b9333c182c49a8825d119e",
+      "commitment_hash": "0x0c7d33da20d34ea0f9f2616fb8fa079715e36885a89132cd96e18e1d3549443e",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0xa47469deba34c88641f7274a5974526541c67243a61592446e73a390ad90e154",
+      "proof_pi_b": "0x73b694953a5562213ac2b53abb9c49761918a5e73f4f6a482641f9cb55bd7040",
+      "proof_pi_c": "0x42b8258110e9f5a0fbf75fff86635da9e365a720af497ddfaba47405cf3099af",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0x7381b6d3e770cca3006113a158482e3a2e81e702c9ba3e856f41bd7293b88a22",
+      "commitment_hash": "0xb688c846d816eebdce3d001ca63f72a93d5da3a110ab3748036d069f47939d29",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x09fa64b06d9cfe1217406a4fd7b09b9ce3e5623139b7128d78a29c28db168f23",
+      "proof_pi_b": "0xacb1eddc7ff67e06118bc73dd6073d397851315bbe44a00686b96f04426a0e09",
+      "proof_pi_c": "0x97f400fb2ead4e020d44e9f51da49de4e74b4f496f1300156cdf55e4f20b36f7",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xe75320de806fbb2566383b6ebb0adfa84375ad8b19d906404cc7bac31c5fc6ef",
+      "commitment_hash": "0xef50daca80054ea58099981d4146d50e83b6bc2fe904323c68ff58c9e82f0309",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0xd9e9606438c385beaa53538550df8344bf9baabe7c5c69f752b760b020ea2852",
+      "proof_pi_b": "0xcc726d11ab3298c9bbbd5f88e6964e065360da053781c7028e92dfc8574c0387",
+      "proof_pi_c": "0x3f6e96c4208af943531b6001fa4dd42f376b96dfb299af5bf96822fb3d5f1be4",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xbd48a8e97aba464b1299a9e702991808e7c8723017bb670f62206095d8ae367f",
+      "commitment_hash": "0xa3612f030306e900b9d260fc416208629fee31d8eee77566fbcd2ee5c1113dec",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x561ddfde95bed551e943c27e0caaa4978e896c24097e296148713ad5eab16583",
+      "proof_pi_b": "0x8212c037637f9cf88277b248e654a4685fe291d1522917043be63746b06dfe51",
+      "proof_pi_c": "0xa1ffdd031824ffae0bb073650709b394207be28db203fbc4980067a3942fe014",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0x2e631bb5a7b91c1273e109e1474a237847667071b1c72a939f35ce17482abc70",
+      "commitment_hash": "0x10b91acccb37f9e7714975680113f674bf2521abb142fef956d56effe2a6fc8c",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x006662c6c2d6a686d70b300918b97edb9289a6354c59f136ddd3729e7c427081",
+      "proof_pi_b": "0xfe464834a86015aa2af55f6ec6255e7c9f23008c3cc23dc6b85582eb086934c2",
+      "proof_pi_c": "0xb6aa2a2ef793ee76bc34c6402096aedfcae5b719b279b432bff33a677cc37b81",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0x9974dd0bdcf0960dd14ac297dfa2af62e5206cb22d03373b7c0a345a812177af",
+      "commitment_hash": "0xce1f0a0582dd8f07fe99183f941f026e18756df2d7ef1c74a6756c457d7b5582",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x385885fab50f6ea40858cd361541328ddc6e1f0f2de937c8c4598dd99cf8716e",
+      "proof_pi_b": "0x994f71a844a30efd37a2751c525fe370cff843ec4af26916daea059cd2e00271",
+      "proof_pi_c": "0x04b9ebbbba49127fa1af093ad87e0395058a41d69fb834795924ce28a92394ed",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xf5c08d37b1276fd08cfa667755ddac498d721eba19c0d688243815ee747b5743",
+      "commitment_hash": "0xb7fb7499bda35ef8f2ee631521c61592ca9e5ea0fbd8c564ee2d1743cbe95e1c",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x572215da552e3a5dc80624a9fca2a70db722e4a17014dedd8c5473e42792b945",
+      "proof_pi_b": "0x9498ea222bfdcb0a7e0b143fb6b9db253bea2b30fb0c9479fd44b5c11339f7af",
+      "proof_pi_c": "0xd7ab1085c2a1d534399d5b63f398f50bd12d209bd7601bf7549651c768a2c592",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xdcf9f2bdd0717e5e4e7b5be5729aee6860bc2006fe3b7722a455baa4edba1ba0",
+      "commitment_hash": "0x1bef4bac4a9ba22b28aad72223c07cf683a803cdbf0397192f92536e0cf158d6",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0xc03b1f53cdd76e1bb84d55f752f5e5f1788459c8405dd64e0290ca2401299c46",
+      "proof_pi_b": "0x55b904a0f73066f0e2d73576f4a28ddf93a100522e0285034805065072e8e9e0",
+      "proof_pi_c": "0x928d5520f581056505a68550289f3e7bb19a7778ce3317e0b79e93145d4e084d",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xa1d4446857197bc212f2994009385b7205e4c15ae539121c9b13d9b722de70e1",
+      "commitment_hash": "0x77f9ea0e6051c62c5a635df7dacf47c6a8ec2955827b4704e11230e13d23bce8",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0xb1eae0e70a2ba26a97b02ddd8c54c312183ed56e9123c4ba4ae0b18a6382992b",
+      "proof_pi_b": "0xca2dae9538d65acf276deb7d4c1099b0f2c67548a695762a349f926848f52613",
+      "proof_pi_c": "0xb0b7df45834651f316dcceb53c50f22e4c0f29d79b8c0c026f66cfc84fd1a9cd",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0x38f4146c6520b9e0c4bdb829a8c1a7f7e73ec5fad0463024c4df577a8aadb643",
+      "commitment_hash": "0xb806a6778a2b767b63f91ca73dce80f58ccc0200b9c98f8dd3dd586e5ddfbef1",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x217e119e02fce3e5c78be0dc58db42704aa236e66433e666177c6968b1a2eaf8",
+      "proof_pi_b": "0xe609b9e57456632d8a77454149030ca773cd72a15c4b325ba24f642bd02779dd",
+      "proof_pi_c": "0xe813f2bb4ea30d8278ef29911fa13ba825c9a36c505de1e95101c26933f184f4",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    },
+    {
+      "challenge": "0xc764829143a0fe2f9bed3e97c851247d6e46ddf388eac2ae963315f607f6b07f",
+      "commitment_hash": "0x38f4e85b8063137b24cdf4573629a4616762c090fda016c8e916237834d86300",
+      "is_emissions_compliant": true,
+      "is_region_valid": true,
+      "proof_pi_a": "0x47b0d970704682e14b16599e2298e3c2b41c012e845e8ee671db9764d00429de",
+      "proof_pi_b": "0xfc39350147e3ff6251c311eaa0b8f61489f4680141ee9e3ad3119e7cea11ff57",
+      "proof_pi_c": "0x84d2d1ce2089be9b740b40982cf3367d9e4a033971259121678283964ed93cec",
+      "proof_protocol": "Groth16/Snark-Climate-RangeProof-v1",
+      "public_caps": {
+        "ch4_cap_ppb": 2500.0,
+        "co2_cap_ppm": 600.0,
+        "pm25_cap_ugm3": 50.0
+      },
+      "region_id": "REGION-US-EAST"
+    }
+  ],
+  "zk_proofs_count": 12
+}

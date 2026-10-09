@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIMATETRUST // ORACLE</title>
+    <!-- Leaflet Map CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --fg: #F3F3F3;
+            --border: #333333;
+            --accent-green: #00FF41;
+            --accent-red: #FF003C;
+            --accent-blue: #0055FF;
+            --accent-yellow: #FFED00;
+            --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--fg); 
+            line-height: 1.4; 
+            padding: 32px; 
+            font-family: var(--sans);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+
+        h1, h2, h3 { font-weight: normal; margin: 0; }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Typography */
+        .title-display {
+            font-size: 3vw;
+            line-height: 0.9;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--fg);
+            padding-bottom: 16px;
+        }
+
+        .data-mono {
+            font-family: var(--mono);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        
+        /* Layout Elements */
+        .panel {
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+            background: #0A0A0A;
+        }
+        
+        .panel-header {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+        }
+
+        .panel-body {
+            padding: 16px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Badges & Buttons */
+        .badge {
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 10px;
+        }
+        .badge.status-verified { color: var(--accent-green); border-color: var(--accent-green); }
+        .badge.status-rejected { color: var(--accent-red); border-color: var(--accent-red); }
+        
+        .btn {
+            background: transparent;
+            color: var(--fg);
+            border: 1px solid var(--fg);
+            padding: 10px 16px;
+            font-family: var(--mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        /* Stats */
+        .stat-block {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-block:last-child { border-bottom: none; }
+        .stat-label { color: #888; margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-family: var(--mono); }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-family: var(--mono); text-transform: none; font-size: 12px; }
+        th { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); color: #888; font-family: var(--sans); text-transform: uppercase; font-size: 10px; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        tr:hover { background: #111; }
+
+        /* Blockchain Details */
+        .kv-pair {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+            font-family: var(--mono);
+            text-transform: none;
+        }
+        .kv-pair:last-child { border-bottom: none; }
+        .kv-key { color: #888; text-transform: uppercase; font-family: var(--sans); font-size: 10px; }
+        
+        /* Map */
+        #map { height: 350px; width: 100%; filter: grayscale(100%) invert(100%) contrast(150%); }
+
+        /* Merkle Tree */
+        .merkle-container { display: flex; flex-direction: column-reverse; gap: 16px; padding: 24px 0; align-items: center; }
+        .merkle-row { display: flex; gap: 16px; justify-content: center; }
+        .m-node {
+            border: 1px solid var(--border);
+            padding: 8px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: #888;
+            background: #000;
+            cursor: pointer;
+        }
+        .m-node:hover, .m-node.active {
+            border-color: var(--fg);
+            color: var(--fg);
+        }
+        .m-node.root { border-color: var(--accent-green); color: var(--accent-green); }
+
+        /* Findings */
+        .finding-card {
+            border-left: 2px solid var(--accent-red);
+            padding: 12px;
+            margin-bottom: 16px;
+            background: #0F0505;
+        }
+        .finding-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .finding-desc { font-family: var(--mono); text-transform: none; color: #AAA; }
+        .severity-critical { color: var(--accent-red); }
+        .severity-high { color: var(--accent-yellow); }
+
+        @media (max-width: 1024px) {
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="title-display">
+                CLIMATE<br/>TRUST<br/>ORACLE
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header"><span>System Identity</span></div>
+                <div class="panel-body data-mono" style="color:#888; font-size:10px;">
+                    VERSION: 2.0.0-RC1<br/>
+                    NETWORK: ETHEREUM SEPOLIA<br/>
+                    PROTOCOL: ZK-SNARK / ERC-20
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header"><span>Telemetry Stats</span></div>
+                <div class="stat-block">
+                    <div class="stat-label">Total Nodes</div>
+                    <div class="stat-value">15</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">Verified</div>
+                    <div class="stat-value" style="color: var(--accent-green)">12</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">Quarantined</div>
+                    <div class="stat-value" style="color: var(--accent-red)">3</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">Integrity</div>
+                    <div class="stat-value" style="color: #FFED00">80.0%</div>
+                </div>
+            </div>
+            
+            <button id="btnConnectWallet" class="btn" style="width: 100%;">Connect Wallet</button>
+            <div id="walletAddress" class="panel data-mono" style="display:none; padding:12px; border-color:var(--accent-green); color:var(--accent-green); text-align:center;"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Geospatial Array</span>
+                    <span class="badge">Live</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                <!-- Telemetry Stream -->
+                <div class="panel">
+                    <div class="panel-header"><span>Data Stream</span></div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>CO2</th>
+                                    <th>CH4</th>
+                                    <th>PM2.5</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+            <tr>
+                <td>STN-INDU-001</td>
+                <td>412.9</td>
+                <td>2267.5</td>
+                <td>41.7</td>
+                <td><span class="badge status-rejected">QUARANTINED</span></td>
+            </tr>
+            <tr>
+                <td>STN-INDU-002</td>
+                <td>420.0</td>
+                <td>1900.0</td>
+                <td>15.0</td>
+                <td><span class="badge status-rejected">QUARANTINED</span></td>
+            </tr>
+            <tr>
+                <td>STN-INDU-003</td>
+                <td>513.1</td>
+                <td>2225.8</td>
+                <td>45.6</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-INDU-004</td>
+                <td>516.1</td>
+                <td>2269.6</td>
+                <td>43.2</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-INDU-005</td>
+                <td>508.2</td>
+                <td>2234.8</td>
+                <td>40.2</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-URBA-006</td>
+                <td>439.5</td>
+                <td>1983.3</td>
+                <td>25.2</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-URBA-007</td>
+                <td>443.9</td>
+                <td>1985.0</td>
+                <td>22.7</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-URBA-008</td>
+                <td>448.4</td>
+                <td>1929.6</td>
+                <td>22.1</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-URBA-009</td>
+                <td>438.6</td>
+                <td>1936.7</td>
+                <td>25.9</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-URBA-010</td>
+                <td>446.1</td>
+                <td>1977.7</td>
+                <td>22.7</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-COAS-011</td>
+                <td>414.6</td>
+                <td>1825.0</td>
+                <td>9.1</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-COAS-012</td>
+                <td>423.9</td>
+                <td>1833.6</td>
+                <td>9.0</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-COAS-013</td>
+                <td>419.2</td>
+                <td>1794.7</td>
+                <td>10.8</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-COAS-014</td>
+                <td>417.9</td>
+                <td>1813.1</td>
+                <td>6.0</td>
+                <td><span class="badge status-verified">VERIFIED</span></td>
+            </tr>
+            <tr>
+                <td>STN-COAS-015</td>
+                <td>610.5</td>
+                <td>3100.0</td>
+                <td>85.0</td>
+                <td><span class="badge status-rejected">QUARANTINED</span></td>
+            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Threat Intel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Adversarial Forensics</span>
+                        <span class="badge status-rejected">3 Detected</span>
+                    </div>
+                    <div class="panel-body" style="max-height: 300px; overflow-y: auto;">
+                        
+            <div class="finding-card">
+                <div class="finding-header">
+                    <span class="finding-rule">SPATIAL_NEIGHBORHOOD_DIVERGENCE</span>
+                    <span class="finding-severity severity-high">HIGH [92%]</span>
+                </div>
+                <div class="finding-desc">Station STN-COAS-015 reported CO2=610.5 ppm, diverging drastically from 4 spatial neighbors (mean=418.9 ppm).</div>
+            </div>
+            <div class="finding-card">
+                <div class="finding-header">
+                    <span class="finding-rule">COMBUSTION_DECOUPLING_UNDER_REPORTING</span>
+                    <span class="finding-severity severity-critical">CRITICAL [96%]</span>
+                </div>
+                <div class="finding-desc">Physical decoupling detected: Station STN-INDU-001 claims low CO2 (412.9 ppm) despite severe combustion markers (PM2.5=41.7 ug/m3, CH4=2267.5 ppb). High probability of carbon tax evasion through fraudulent telemetry clipping.</div>
+            </div>
+            <div class="finding-card">
+                <div class="finding-header">
+                    <span class="finding-rule">SYNTHETIC_ZERO_ENTROPY_PAYLOAD</span>
+                    <span class="finding-severity severity-high">HIGH [88%]</span>
+                </div>
+                <div class="finding-desc">Telemetry from STN-INDU-002 exhibits zero entropy and exact rounded integers across 5 sensors. Physical sensors in atmosphere always display micro-fluctuation noise.</div>
+            </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cryptographic Ledger -->
+            <div class="panel">
+                <div class="panel-header"><span>Cryptographic Attestation Ledger</span></div>
+                <div class="panel-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                    <div>
+                        <div class="kv-pair"><span class="kv-key">Status</span> <span style="color:var(--accent-green)">CONFIRMED</span></div>
+                        <div class="kv-pair"><span class="kv-key">Epoch</span> <span>EPOCH-1791558401</span></div>
+                        <div class="kv-pair"><span class="kv-key">Merkle Root</span> <span>0x930dd2a38b88509765c70f5f7a09fd0a422d418c0d497cc1ed4ab83004a875f5</span></div>
+                        <div class="kv-pair"><span class="kv-key">Signature</span> <span>0x3046022100f1fbe19391cd63c8da</span></div>
+                        <div class="kv-pair"><span class="kv-key">Tx Hash</span> <span>0x05fb0a565b964e7102092e721083</span></div>
+                        <div class="kv-pair"><span class="kv-key">Block</span> <span>#19842101</span></div>
+                    </div>
+                    <div class="merkle-container" id="merkleVis">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Events -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Live Network Log (WSS)</span>
+                    <span class="badge" id="wsStatus" style="border-color: #888; color: #888;">INIT</span>
+                </div>
+                <div style="max-height: 200px; overflow-y: auto; background: #000;">
+                    <table>
+                        <tbody id="wsLog"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const telemetryData = [{"station_id": "STN-INDU-001", "timestamp": 1791558398, "latitude": 40.71698, "longitude": -74.02025, "co2_ppm": 412.91, "ch4_ppb": 2267.55, "pm25_ugm3": 41.74, "temperature_c": 22.74, "humidity_pct": 50.21, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "under_reporting", "raw_signature": null, "metadata": {"cluster": "INDUSTRIAL_ZONE_NORTH", "is_simulated": true, "ground_truth_co2": 519.4990786229455, "tamper_reason": "Tax-evasion under-reporting clamp"}}, {"station_id": "STN-INDU-002", "timestamp": 1791558415, "latitude": 40.69875, "longitude": -74.01819, "co2_ppm": 420.0, "ch4_ppb": 1900.0, "pm25_ugm3": 15.0, "temperature_c": 22.0, "humidity_pct": 50.0, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "synthetic_flatline", "raw_signature": null, "metadata": {"cluster": "INDUSTRIAL_ZONE_NORTH", "is_simulated": true, "tamper_reason": "Synthetic zero-variance mock payload"}}, {"station_id": "STN-INDU-003", "timestamp": 1791558380, "latitude": 40.71415, "longitude": -74.01439, "co2_ppm": 513.06, "ch4_ppb": 2225.79, "pm25_ugm3": 45.62, "temperature_c": 23.53, "humidity_pct": 49.27, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "INDUSTRIAL_ZONE_NORTH", "is_simulated": true}}, {"station_id": "STN-INDU-004", "timestamp": 1791558387, "latitude": 40.70426, "longitude": -73.9981, "co2_ppm": 516.11, "ch4_ppb": 2269.57, "pm25_ugm3": 43.17, "temperature_c": 23.2, "humidity_pct": 50.77, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "INDUSTRIAL_ZONE_NORTH", "is_simulated": true}}, {"station_id": "STN-INDU-005", "timestamp": 1791558426, "latitude": 40.72201, "longitude": -73.99911, "co2_ppm": 508.21, "ch4_ppb": 2234.83, "pm25_ugm3": 40.17, "temperature_c": 23.93, "humidity_pct": 50.7, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "INDUSTRIAL_ZONE_NORTH", "is_simulated": true}}, {"station_id": "STN-URBA-006", "timestamp": 1791558425, "latitude": 40.75475, "longitude": -73.99433, "co2_ppm": 439.51, "ch4_ppb": 1983.33, "pm25_ugm3": 25.25, "temperature_c": 23.7, "humidity_pct": 45.4, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "URBAN_METRO_CORE", "is_simulated": true}}, {"station_id": "STN-URBA-007", "timestamp": 1791558430, "latitude": 40.75088, "longitude": -73.99707, "co2_ppm": 443.88, "ch4_ppb": 1984.98, "pm25_ugm3": 22.73, "temperature_c": 23.85, "humidity_pct": 50.0, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "URBAN_METRO_CORE", "is_simulated": true}}, {"station_id": "STN-URBA-008", "timestamp": 1791558388, "latitude": 40.76441, "longitude": -73.99796, "co2_ppm": 448.43, "ch4_ppb": 1929.56, "pm25_ugm3": 22.15, "temperature_c": 23.51, "humidity_pct": 51.38, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "URBAN_METRO_CORE", "is_simulated": true}}, {"station_id": "STN-URBA-009", "timestamp": 1791558391, "latitude": 40.77359, "longitude": -73.9809, "co2_ppm": 438.6, "ch4_ppb": 1936.7, "pm25_ugm3": 25.91, "temperature_c": 22.77, "humidity_pct": 49.76, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "URBAN_METRO_CORE", "is_simulated": true}}, {"station_id": "STN-URBA-010", "timestamp": 1791558402, "latitude": 40.75593, "longitude": -73.99811, "co2_ppm": 446.14, "ch4_ppb": 1977.65, "pm25_ugm3": 22.66, "temperature_c": 23.42, "humidity_pct": 48.69, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "URBAN_METRO_CORE", "is_simulated": true}}, {"station_id": "STN-COAS-011", "timestamp": 1791558428, "latitude": 40.59907, "longitude": -74.13776, "co2_ppm": 414.59, "ch4_ppb": 1825.01, "pm25_ugm3": 9.05, "temperature_c": 24.13, "humidity_pct": 49.55, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "COASTAL_BASELINE_PARK", "is_simulated": true}}, {"station_id": "STN-COAS-012", "timestamp": 1791558426, "latitude": 40.60471, "longitude": -74.15434, "co2_ppm": 423.95, "ch4_ppb": 1833.64, "pm25_ugm3": 8.98, "temperature_c": 22.65, "humidity_pct": 49.81, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "COASTAL_BASELINE_PARK", "is_simulated": true}}, {"station_id": "STN-COAS-013", "timestamp": 1791558406, "latitude": 40.59049, "longitude": -74.14638, "co2_ppm": 419.23, "ch4_ppb": 1794.73, "pm25_ugm3": 10.81, "temperature_c": 23.68, "humidity_pct": 51.55, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "COASTAL_BASELINE_PARK", "is_simulated": true}}, {"station_id": "STN-COAS-014", "timestamp": 1791558412, "latitude": 40.61302, "longitude": -74.16486, "co2_ppm": 417.87, "ch4_ppb": 1813.08, "pm25_ugm3": 6.02, "temperature_c": 23.11, "humidity_pct": 49.44, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "none", "raw_signature": null, "metadata": {"cluster": "COASTAL_BASELINE_PARK", "is_simulated": true}}, {"station_id": "STN-COAS-015", "timestamp": 1791558403, "latitude": 40.59741, "longitude": -74.15639, "co2_ppm": 610.5, "ch4_ppb": 3100.0, "pm25_ugm3": 85.0, "temperature_c": 22.7, "humidity_pct": 52.21, "source_api": "Copernicus-Sentinel5P/OpenAQ-Edge", "attack_injected": "sensor_spoofing", "raw_signature": null, "metadata": {"cluster": "COASTAL_BASELINE_PARK", "is_simulated": true, "tamper_reason": "Location coordinate spoofing / forged identity"}}];
+        const merkleRoot = "0x930dd2a38b88509765c70f5f7a09fd0a422d418c0d497cc1ed4ab83004a875f5";
+        
+        // Wallet
+        document.getElementById('btnConnectWallet').addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('walletAddress').style.display = 'block';
+            document.getElementById('walletAddress').innerText = "CONNECTED: 0x" + Math.random().toString(16).slice(2,10) + "..." + Math.random().toString(16).slice(2,6);
+        });
+
+        // Map
+        const map = L.map('map', { zoomControl: false }).setView([0, 0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        const bounds = [];
+        telemetryData.forEach(p => {
+            if (p.latitude && p.longitude) {
+                const isRejected = p.attack_injected !== 'none';
+                const color = isRejected ? '#FF003C' : '#00FF41';
+                const icon = L.divIcon({
+                    html: `<div style="background:${color}; width:8px; height:8px; border-radius:0;"></div>`,
+                    className: '',
+                    iconSize: [8, 8],
+                    iconAnchor: [4, 4]
+                });
+                L.marker([p.latitude, p.longitude], {icon: icon}).addTo(map);
+                bounds.push([p.latitude, p.longitude]);
+            }
+        });
+        if (bounds.length > 0) map.fitBounds(bounds, {padding: [50, 50]});
+
+        // Merkle Visualizer
+        const mVis = document.getElementById('merkleVis');
+        const validSamples = telemetryData.filter(p => p.attack_injected === 'none');
+        
+        const l1 = document.createElement('div'); l1.className = 'merkle-row';
+        const l2 = document.createElement('div'); l2.className = 'merkle-row';
+        const l3 = document.createElement('div'); l3.className = 'merkle-row';
+
+        const rootNode = document.createElement('div');
+        rootNode.className = 'm-node root';
+        rootNode.innerText = "ROOT:" + merkleRoot.substring(0,8);
+        l3.appendChild(rootNode);
+
+        const intNodes = [];
+        for(let i=0; i<2; i++) {
+            const node = document.createElement('div');
+            node.className = 'm-node';
+            node.innerText = "H:" + Math.random().toString(16).slice(2,10);
+            intNodes.push(node);
+            l2.appendChild(node);
+        }
+
+        validSamples.slice(0,4).forEach((s, i) => {
+            const leaf = document.createElement('div');
+            leaf.className = 'm-node';
+            leaf.innerText = s.station_id.substring(0,8);
+            leaf.addEventListener('click', () => {
+                document.querySelectorAll('.m-node').forEach(n => n.classList.remove('active'));
+                leaf.classList.add('active');
+                rootNode.classList.add('active');
+                intNodes[Math.floor(i/2)].classList.add('active');
+            });
+            l1.appendChild(leaf);
+        });
+
+        mVis.appendChild(l1);
+        mVis.appendChild(l2);
+        mVis.appendChild(l3);
+
+        // WebSockets
+        const wsLog = document.getElementById('wsLog');
+        const wsStatus = document.getElementById('wsStatus');
+        
+        function logWs(type, msg, color) {
+            const tr = document.createElement('tr');
+            const time = new Date().toISOString().substring(11, 23);
+            tr.innerHTML = `<td style="color:#555; width:120px;">${time}</td><td style="color:${color}; width:120px;">${type}</td><td class="data-mono" style="color:#CCC;">${msg}</td>`;
+            wsLog.prepend(tr);
+        }
+
+        setTimeout(() => {
+            wsStatus.innerText = "LIVE";
+            wsStatus.style.borderColor = "var(--accent-green)";
+            wsStatus.style.color = "var(--accent-green)";
+            logWs("SYS", "WSS Handshake Established", "#888");
+            setTimeout(() => logWs("ZK-PROOF", "Synthesizing constraint system for valid spatial bounds", "#0055FF"), 1000);
+            setTimeout(() => logWs("IPFS", "Pinned payload. CID: QmXy...Z8p", "#F3F3F3"), 2500);
+            setTimeout(() => logWs("ERC-20", "Minting 100 VCC. Integrity threshold met.", "var(--accent-green)"), 4000);
+        }, 500);
+
+    </script>
+</body>
+</html>
