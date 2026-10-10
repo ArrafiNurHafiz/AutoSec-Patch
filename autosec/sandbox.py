@@ -2,8 +2,8 @@ import subprocess
 import os
 import shutil
 import tempfile
-import sys
 from typing import Tuple, Optional
+
 
 class EnterpriseWorktreeSandbox:
     """Enhanced zero-trust sandbox with timeout guard, memory limits, and isolated env."""
@@ -37,7 +37,9 @@ class EnterpriseWorktreeSandbox:
             )
             shutil.rmtree(self.worktree_dir, ignore_errors=True)
 
-    def execute_safe_command(self, cmd: str, workdir: Optional[str] = None) -> Tuple[bool, str]:
+    def execute_safe_command(
+        self, cmd: str, workdir: Optional[str] = None
+    ) -> Tuple[bool, str]:
         """Execute test or PoC with strict subprocess timeout guard."""
         cwd = workdir or self.worktree_dir or self.repo_path
         try:
@@ -52,7 +54,11 @@ class EnterpriseWorktreeSandbox:
             output = f"{res.stdout}\n{res.stderr}".strip()
             return res.returncode == 0, output
         except subprocess.TimeoutExpired:
-            return False, f"EXECUTION_TIMEOUT: Process exceeded {self.timeout}s sandbox limit."
+            return (
+                False,
+                f"EXECUTION_TIMEOUT: Process exceeded {self.timeout}s sandbox limit.",
+            )
+
 
 # Backward compatibility alias
 WorktreeSandbox = EnterpriseWorktreeSandbox

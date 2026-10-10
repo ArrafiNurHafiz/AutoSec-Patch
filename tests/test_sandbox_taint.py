@@ -12,6 +12,7 @@ def query_handler(user_input):
     return conn.execute(formatted).fetchall()
 """
 
+
 class TestUpgradedFeatures(unittest.TestCase):
     def test_taint_path_extraction(self):
         analyzer = SemanticGraphAnalyzer(SAMPLE_TAINT_CODE)
@@ -28,6 +29,7 @@ class TestUpgradedFeatures(unittest.TestCase):
             self.assertTrue(os.path.exists(test_file))
         # Verify sandbox cleanup
         self.assertFalse(os.path.exists(sb_dir))
+
 
 if __name__ == "__main__":
     unittest.main()

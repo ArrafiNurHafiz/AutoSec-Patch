@@ -13,12 +13,18 @@ requires-python = ">=3.10"
 dependencies = [
     "requests>=2.28.0",
     "click>=8.0.0",
+    "cryptography>=41.0.0",
+    "eth-hash[pycryptodome]>=0.7.0",
+    "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
 ]
 
 [project.scripts]
 autosec = "autosec.cli:main"
+climatetrust = "climatetrust.cli:main"

@@ -2,8 +2,9 @@ import subprocess
 import shutil
 import json
 import os
-from typing import List, Optional
+from typing import List
 from autosec.parser import VulnerabilityFinding, parse_sarif_or_json
+
 
 class LiveSASTOrchestrator:
     """Orchestrates real SAST tools (Semgrep, Bandit, Flake8) directly against the codebase."""
@@ -15,7 +16,16 @@ class LiveSASTOrchestrator:
             return []
 
         sarif_out = os.path.join(target_dir, "live_semgrep.sarif")
-        cmd = ["semgrep", "scan", "--config", "auto", "--sarif", "--output", sarif_out, target_dir]
+        cmd = [
+            "semgrep",
+            "scan",
+            "--config",
+            "auto",
+            "--sarif",
+            "--output",
+            sarif_out,
+            target_dir,
+        ]
         try:
             subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             if os.path.exists(sarif_out):

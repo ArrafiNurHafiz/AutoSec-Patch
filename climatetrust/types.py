@@ -7,16 +7,18 @@ from typing import Dict, List, Optional, Any
 
 class AttackType(str, Enum):
     """Types of adversarial attacks or data tampering in climate pipelines."""
+
     NONE = "none"
-    UNDER_REPORTING = "under_reporting"        # Fraudulent suppression of emission spikes to evade carbon tax
-    DRIFT_POISONING = "drift_poisoning"        # Gradual stealth bias injection
-    SENSOR_SPOOFING = "sensor_spoofing"        # Falsified location/station identity
-    REPLAY_ATTACK = "replay_attack"            # Repeating stale low-emission data payloads
+    UNDER_REPORTING = "under_reporting"  # Fraudulent suppression of emission spikes to evade carbon tax
+    DRIFT_POISONING = "drift_poisoning"  # Gradual stealth bias injection
+    SENSOR_SPOOFING = "sensor_spoofing"  # Falsified location/station identity
+    REPLAY_ATTACK = "replay_attack"  # Repeating stale low-emission data payloads
     SYNTHETIC_FLATLINE = "synthetic_flatline"  # Constant fake zero variance numbers
 
 
 class VerificationStatus(str, Enum):
     """Verification outcome for climate telemetry."""
+
     VERIFIED = "verified"
     FLAGGED_ANOMALOUS = "flagged_anomalous"
     REJECTED_TAMPERED = "rejected_tampered"
@@ -25,16 +27,17 @@ class VerificationStatus(str, Enum):
 @dataclass
 class TelemetryPoint:
     """Individual environmental telemetry observation."""
+
     station_id: str
-    timestamp: int                          # Unix timestamp in seconds
+    timestamp: int  # Unix timestamp in seconds
     latitude: float
     longitude: float
-    co2_ppm: float                         # Carbon Dioxide (ppm)
-    ch4_ppb: float                         # Methane (ppb)
-    pm25_ugm3: float                       # PM2.5 particulate matter (ug/m3)
-    temperature_c: float                   # Ambient temperature in Celsius
-    humidity_pct: float                    # Relative humidity (0 - 100%)
-    source_api: str                        # e.g. 'Copernicus-Sentinel5P', 'OpenAQ-GroundNode'
+    co2_ppm: float  # Carbon Dioxide (ppm)
+    ch4_ppb: float  # Methane (ppb)
+    pm25_ugm3: float  # PM2.5 particulate matter (ug/m3)
+    temperature_c: float  # Ambient temperature in Celsius
+    humidity_pct: float  # Relative humidity (0 - 100%)
+    source_api: str  # e.g. 'Copernicus-Sentinel5P', 'OpenAQ-GroundNode'
     attack_injected: AttackType = AttackType.NONE
     raw_signature: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -60,9 +63,10 @@ class TelemetryPoint:
 @dataclass
 class AuditFinding:
     """Specific adversarial anomaly or integrity violation discovered by AI verification."""
+
     rule_name: str
-    severity: str                           # "LOW", "MEDIUM", "HIGH", "CRITICAL"
-    confidence: float                       # 0.0 to 1.0
+    severity: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
+    confidence: float  # 0.0 to 1.0
     station_id: str
     explanation: str
     metric_impacted: str
@@ -83,12 +87,13 @@ class AuditFinding:
 @dataclass
 class AttestationReport:
     """Full epoch attestation report ready for cryptographic sealing and smart contract attestation."""
+
     epoch_id: str
     timestamp: int
     total_samples: int
     verified_samples: int
     rejected_samples: int
-    overall_integrity_score: float         # 0.0 to 1.0 (>= 0.85 passes verification threshold)
+    overall_integrity_score: float  # 0.0 to 1.0 (>= 0.85 passes verification threshold)
     status: VerificationStatus
     merkle_root: str
     oracle_signature: str

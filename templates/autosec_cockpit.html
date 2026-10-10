@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoSec-Patch: Autonomous Co-Evolution SecOps Cockpit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#090d16',
+                        surface: '#111827',
+                        border: '#1f2937',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg text-gray-100 font-sans p-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AutoSec-Patch Co-Evolution Cockpit</h1>
+            <p class="mt-1 text-gray-400 text-sm">Adversarial Red/Blue Multi-Agent Remediation via Nebius Token Factory & NVIDIA Nemotron</p>
+        </div>
+        <div class="flex gap-6 mt-6 md:mt-0">
+            <div class="bg-surface px-6 py-4 rounded-xl border border-border text-center shadow-lg">
+                <div class="text-2xl font-bold text-blue-500">__TOTAL_FINDINGS__</div>
+                <div class="text-xs text-gray-400 uppercase tracking-wider mt-1">Findings</div>
+            </div>
+            <div class="bg-surface px-6 py-4 rounded-xl border border-border text-center shadow-lg">
+                <div class="text-2xl font-bold text-blue-500">__SUCCESS_RATE__%</div>
+                <div class="text-xs text-gray-400 uppercase tracking-wider mt-1">Immunity Rate</div>
+            </div>
+            <div class="bg-surface px-6 py-4 rounded-xl border border-border text-center shadow-lg">
+                <div class="text-2xl font-bold text-blue-500">Nebius Cloud</div>
+                <div class="text-xs text-gray-400 uppercase tracking-wider mt-1">Inference Engine</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        __CARDS_HTML__
+    </div>
+</body>
+</html>

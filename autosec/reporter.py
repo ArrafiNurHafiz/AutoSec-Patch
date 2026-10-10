@@ -1,187 +1,97 @@
 import os
-import json
-from typing import List, Dict
+from typing import List
 from autosec.types import RemediationResult
 
-def generate_interactive_html_dashboard(results: List[RemediationResult], output_path: str = "report.html") -> str:
+
+def generate_interactive_html_dashboard(
+    results: List[RemediationResult], output_path: str = "report.html"
+) -> str:
     """Generates an enterprise-grade dark-themed interactive SecOps report."""
     total_findings = len(results)
     total_secured = sum(1 for r in results if r.verified_secure and r.regression_passed)
-    success_rate = (total_secured / total_findings * 100) if total_findings > 0 else 100.0
+    success_rate = (
+        (total_secured / total_findings * 100) if total_findings > 0 else 100.0
+    )
 
     cards_html = ""
     for idx, r in enumerate(results, 1):
-        status_color = "#10b981" if (r.verified_secure and r.regression_passed) else "#ef4444"
-        status_text = "VERIFIED IMMUNE" if (r.verified_secure and r.regression_passed) else "FAILED VERIFICATION"
+        is_secure = r.verified_secure and r.regression_passed
+        status_color_bg = "bg-green-500/10" if is_secure else "bg-red-500/10"
+        status_color_text = "text-green-500" if is_secure else "text-red-500"
+        status_color_border = (
+            "border-green-500/30" if is_secure else "border-red-500/30"
+        )
+        status_text = "VERIFIED IMMUNE" if is_secure else "FAILED VERIFICATION"
 
         timeline_items = ""
         for t in r.timeline:
             timeline_items += f"""
-            <div class="timeline-step">
-                <div class="step-header">
-                    <span class="agent-badge">{t.agent_name}</span>
-                    <span class="model-badge">{t.model_used}</span>
+            <div class="bg-gray-900 border border-gray-800 p-3 rounded-lg min-w-[220px]">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-semibold text-xs text-pink-400">{t.agent_name}</span>
                 </div>
-                <div class="step-tokens">Tokens: {t.token_usage.get('prompt', 0) + t.token_usage.get('completion', 0)}</div>
+                <span class="text-[11px] text-gray-400 block mb-2">{t.model_used}</span>
+                <div class="text-[11px] text-gray-500">Tokens: {t.token_usage.get('prompt', 0) + t.token_usage.get('completion', 0)}</div>
             </div>
             """
 
         cards_html += f"""
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <span class="badge cwe-badge">{r.finding.cwe or 'CWE'}</span>
-                    <span class="rule-title">{r.finding.rule_id}</span>
+        <div class="bg-surface border border-border rounded-xl overflow-hidden shadow-lg">
+            <div class="flex justify-between items-center p-5 bg-gray-900/50 border-b border-border">
+                <div class="flex items-center gap-3">
+                    <span class="px-2 py-1 rounded bg-gray-700 text-yellow-400 text-xs font-semibold">{r.finding.cwe or 'CWE'}</span>
+                    <span class="font-semibold text-lg">{r.finding.rule_id}</span>
                 </div>
-                <span class="badge status-badge" style="background: {status_color}22; color: {status_color}; border: 1px solid {status_color};">
+                <span class="px-3 py-1 rounded text-xs font-bold border {status_color_bg} {status_color_text} {status_color_border}">
                     {status_text}
                 </span>
             </div>
-            <div class="card-body">
-                <p class="file-path">📁 <code>{r.finding.file_path}:{r.finding.start_line}</code></p>
-                <p class="finding-msg">{r.finding.message}</p>
+            <div class="p-6">
+                <p class="text-sm text-gray-400 mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    <code class="font-mono">{r.finding.file_path}:{r.finding.start_line}</code>
+                </p>
+                <p class="text-base text-gray-200 mb-6 leading-relaxed">{r.finding.message}</p>
                 
-                <div class="grid-2">
-                    <div>
-                        <h4>⚡ Blast Radius Impacted Nodes</h4>
-                        <div class="tag-container">
-                            {''.join(f'<span class="tag">{node}</span>' for node in r.blast_radius_nodes)}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
+                        <h4 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">⚡ Blast Radius Impacted Nodes</h4>
+                        <div class="flex flex-wrap gap-2">
+                            {''.join(f'<span class="bg-gray-800 text-blue-400 px-2 py-1 rounded text-xs">{node}</span>' for node in r.blast_radius_nodes)}
                         </div>
                     </div>
-                    <div>
-                        <h4>🔄 Co-Evolution Loop</h4>
-                        <p>Iterations: <strong>{r.iterations}</strong> | Self-Healing: <strong>Active</strong></p>
+                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
+                        <h4 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">🔄 Co-Evolution Loop</h4>
+                        <p class="text-sm text-gray-400">Iterations: <strong class="text-gray-200">{r.iterations}</strong> | Self-Healing: <strong class="text-green-400">Active</strong></p>
                     </div>
                 </div>
 
-                <h4>🛡️ Synthesized Invariant-Preserving Diff</h4>
-                <pre class="code-block"><code>{r.final_patch}</code></pre>
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">🛡️ Synthesized Invariant-Preserving Diff</h4>
+                    <pre class="bg-gray-950 p-4 rounded-lg border border-gray-800 overflow-x-auto text-sm text-emerald-400 font-mono"><code>{r.final_patch}</code></pre>
+                </div>
 
-                <h4>🤖 Swarm Orchestration Timeline</h4>
-                <div class="timeline-container">
-                    {timeline_items}
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">🤖 Swarm Orchestration Timeline</h4>
+                    <div class="flex gap-4 overflow-x-auto pb-2">
+                        {timeline_items}
+                    </div>
                 </div>
             </div>
         </div>
         """
 
-    html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>AutoSec-Patch: Autonomous Co-Evolution SecOps Cockpit</title>
-    <style>
-        :root {{
-            --bg: #090d16;
-            --surface: #111827;
-            --border: #1f2937;
-            --primary: #3b82f6;
-            --accent: #8b5cf6;
-            --text: #f9fafb;
-            --text-muted: #9ca3af;
-        }}
-        body {{
-            margin: 0;
-            padding: 2rem;
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }}
-        .header {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }}
-        .title h1 {{ margin: 0; font-size: 1.8rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-        .title p {{ margin: 0.3rem 0 0; color: var(--text-muted); font-size: 0.9rem; }}
-        .metrics {{ display: flex; gap: 1.5rem; }}
-        .metric-box {{
-            background: var(--surface);
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }}
-        .metric-val {{ font-size: 1.5rem; font-weight: bold; color: var(--primary); }}
-        .metric-label {{ font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }}
-        .card {{
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }}
-        .card-header {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem;
-            background: #161f30;
-            border-bottom: 1px solid var(--border);
-        }}
-        .card-body {{ padding: 1.2rem; }}
-        .badge {{ padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }}
-        .cwe-badge {{ background: #374151; color: #fbbf24; margin-right: 0.5rem; }}
-        .rule-title {{ font-weight: 600; font-size: 1.05rem; }}
-        .file-path {{ color: var(--text-muted); font-size: 0.9rem; }}
-        .finding-msg {{ font-size: 0.95rem; line-height: 1.5; }}
-        .grid-2 {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }}
-        .tag-container {{ display: flex; flex-wrap: wrap; gap: 0.5rem; }}
-        .tag {{ background: #1f2937; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #60a5fa; }}
-        .code-block {{
-            background: #030712;
-            padding: 1rem;
-            border-radius: 6px;
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #34d399;
-        }}
-        .timeline-container {{ display: flex; gap: 1rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }}
-        .timeline-step {{
-            background: #0b1120;
-            border: 1px solid var(--border);
-            padding: 0.7rem;
-            border-radius: 6px;
-            min-width: 220px;
-        }}
-        .agent-badge {{ font-weight: 600; font-size: 0.8rem; color: #f472b6; }}
-        .model-badge {{ font-size: 0.7rem; color: var(--text-muted); display: block; }}
-        .step-tokens {{ font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="title">
-            <h1>AutoSec-Patch Co-Evolution Cockpit</h1>
-            <p>Adversarial Red/Blue Multi-Agent Remediation via Nebius Token Factory & NVIDIA Nemotron</p>
-        </div>
-        <div class="metrics">
-            <div class="metric-box">
-                <div class="metric-val">{total_findings}</div>
-                <div class="metric-label">Findings</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-val">{success_rate:.0f}%</div>
-                <div class="metric-label">Immunity Rate</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-val">Nebius Cloud</div>
-                <div class="metric-label">Inference Engine</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="findings-list">
-        {cards_html}
-    </div>
-</body>
-</html>
-"""
+    # Read from template
+    template_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "templates", "autosec_cockpit.html"
+    )
+    with open(template_path, "r", encoding="utf-8") as f:
+        html_template = f.read()
+
+    html_content = html_template.replace("__TOTAL_FINDINGS__", str(total_findings))
+    html_content = html_content.replace("__SUCCESS_RATE__", f"{success_rate:.0f}")
+    html_content = html_content.replace("__CARDS_HTML__", cards_html)
+
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     return output_path

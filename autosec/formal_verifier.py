@@ -1,6 +1,6 @@
 import ast
-import re
-from typing import Tuple, List, Dict, Any
+from typing import Tuple
+
 
 class FormalConstraintVerifier:
     """Symbolic constraint verifier proving unreachability of taint sinks."""
@@ -26,12 +26,19 @@ class FormalConstraintVerifier:
                     for arg in node.args:
                         # Check if arg is JoinedStr (f-string) or BinOp (%)
                         if isinstance(arg, ast.JoinedStr):
-                            violations.append("Direct f-string SQL query detected in execute()")
+                            violations.append(
+                                "Direct f-string SQL query detected in execute()"
+                            )
                         elif isinstance(arg, ast.BinOp) and isinstance(arg.op, ast.Mod):
-                            violations.append("String interpolation (%) detected in execute()")
+                            violations.append(
+                                "String interpolation (%) detected in execute()"
+                            )
 
         if violations:
-            return False, f"FORMAL_PROOF_FAILED: SMT constraints violated -> {'; '.join(violations)}"
+            return (
+                False,
+                f"FORMAL_PROOF_FAILED: SMT constraints violated -> {'; '.join(violations)}",
+            )
         return True, "FORMAL_PROOF_PASSED: Invariant proves 100% parameterization."
 
     @classmethod
@@ -45,7 +52,14 @@ class FormalConstraintVerifier:
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 for kw in node.keywords:
-                    if kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True:
-                        return False, "FORMAL_PROOF_FAILED: Insecure shell=True invariant violation."
+                    if (
+                        kw.arg == "shell"
+                        and isinstance(kw.value, ast.Constant)
+                        and kw.value.value is True
+                    ):
+                        return (
+                            False,
+                            "FORMAL_PROOF_FAILED: Insecure shell=True invariant violation.",
+                        )
 
         return True, "FORMAL_PROOF_PASSED: Subprocess execution is formally bounded."

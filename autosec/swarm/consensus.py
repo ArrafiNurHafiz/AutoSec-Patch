@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
-from autosec.types import SecurityFinding, SwarmAgentResult
+from typing import List
+from autosec.types import SecurityFinding
 from autosec.swarm.memory import EpisodicSwarmMemory
+
 
 @dataclass
 class ConsensusVerdict:
@@ -10,6 +11,7 @@ class ConsensusVerdict:
     selected_patch: str
     dissenting_opinions: List[str]
     confidence_level: float
+
 
 class SwarmConsensusProtocol:
     """Orchestrates multi-agent debate and voting between Red, Blue, Auditor, and Architect."""
@@ -23,7 +25,7 @@ class SwarmConsensusProtocol:
         candidate_patch: str,
         is_secure: bool,
         is_regression_clean: bool,
-        blast_radius_nodes: List[str]
+        blast_radius_nodes: List[str],
     ) -> ConsensusVerdict:
         votes = []
         dissent = []
@@ -52,7 +54,13 @@ class SwarmConsensusProtocol:
         # 4. AppSec Auditor Vote (Memory match & best practice)
         past_fix = self.memory.recall_similar_fix(finding.cwe or "CWE-89")
         if past_fix:
-            votes.append(("AppSecAuditor", 1.0, f"Fix aligns with learned memory {past_fix.memory_id}"))
+            votes.append(
+                (
+                    "AppSecAuditor",
+                    1.0,
+                    f"Fix aligns with learned memory {past_fix.memory_id}",
+                )
+            )
         else:
             votes.append(("AppSecAuditor", 0.9, "Novel remediation pattern validated"))
 

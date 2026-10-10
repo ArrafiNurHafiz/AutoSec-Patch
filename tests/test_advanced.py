@@ -2,7 +2,7 @@ import os
 import unittest
 from autosec.ast_analyzer import SemanticGraphAnalyzer
 from autosec.router import ModelMeshRouter
-from autosec.types import ModelTier, SecurityFinding
+from autosec.types import ModelTier
 from autosec.engine import CoEvolutionEngine
 from autosec.reporter import generate_interactive_html_dashboard
 
@@ -21,6 +21,7 @@ def main():
     get_user_data(conn, "admin")
 """
 
+
 class TestAutoSecAdvanced(unittest.TestCase):
     def test_ast_call_graph_and_scope(self):
         analyzer = SemanticGraphAnalyzer(SAMPLE_CODE)
@@ -36,12 +37,19 @@ class TestAutoSecAdvanced(unittest.TestCase):
     def test_model_mesh_routing(self):
         router = ModelMeshRouter()
         self.assertEqual(router.route_agent_task("triage"), ModelTier.NANO.value)
-        self.assertEqual(router.route_agent_task("red_team_exploit"), ModelTier.ULTRA.value)
-        self.assertEqual(router.route_agent_task("blue_team_patch"), ModelTier.SUPER.value)
+        self.assertEqual(
+            router.route_agent_task("red_team_exploit"), ModelTier.ULTRA.value
+        )
+        self.assertEqual(
+            router.route_agent_task("blue_team_patch"), ModelTier.SUPER.value
+        )
 
     def test_coevolution_engine_end_to_end(self):
         engine = CoEvolutionEngine(repo_path=".")
-        results = engine.process_sarif("examples/sample_sarif.json", test_cmd="python3 -m unittest examples/test_vulnerable.py")
+        results = engine.process_sarif(
+            "examples/sample_sarif.json",
+            test_cmd="python3 -m unittest examples/test_vulnerable.py",
+        )
         self.assertEqual(len(results), 1)
         r = results[0]
         self.assertTrue(r.regression_passed)
@@ -49,11 +57,17 @@ class TestAutoSecAdvanced(unittest.TestCase):
 
     def test_report_generation(self):
         engine = CoEvolutionEngine(repo_path=".")
-        results = engine.process_sarif("examples/sample_sarif.json", test_cmd="python3 -m unittest examples/test_vulnerable.py")
-        report_path = generate_interactive_html_dashboard(results, output_path="test_dashboard.html")
+        results = engine.process_sarif(
+            "examples/sample_sarif.json",
+            test_cmd="python3 -m unittest examples/test_vulnerable.py",
+        )
+        report_path = generate_interactive_html_dashboard(
+            results, output_path="test_dashboard.html"
+        )
         self.assertTrue(os.path.exists(report_path))
         if os.path.exists("test_dashboard.html"):
             os.remove("test_dashboard.html")
+
 
 if __name__ == "__main__":
     unittest.main()

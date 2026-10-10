@@ -1,8 +1,8 @@
 import os
 import subprocess
 import tempfile
-import shutil
 from typing import Tuple
+
 
 def apply_patch(repo_path: str, patch_content: str) -> Tuple[bool, str]:
     """Apply a unified diff string to the target repository using git apply or patch command."""
@@ -34,10 +34,14 @@ def apply_patch(repo_path: str, patch_content: str) -> Tuple[bool, str]:
         if res_patch.returncode == 0:
             return True, "Patch applied successfully via patch utility"
 
-        return False, f"Git apply error: {res.stderr}\nPatch tool error: {res_patch.stderr}"
+        return (
+            False,
+            f"Git apply error: {res.stderr}\nPatch tool error: {res_patch.stderr}",
+        )
     finally:
         if os.path.exists(patch_file):
             os.remove(patch_file)
+
 
 def run_tests(repo_path: str, test_cmd: str = "pytest") -> Tuple[bool, str]:
     """Execute test suite in the target repo to ensure no regressions."""

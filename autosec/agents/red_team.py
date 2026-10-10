@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Optional
+from typing import Optional
 from autosec.types import SecurityFinding, SwarmAgentResult, ModelTier
 from autosec.client import NebiusNemotronClient
 
@@ -39,13 +39,16 @@ def run_exploit(target_func):
 """,
 }
 
+
 class RedTeamAgent:
     """Adversarial agent that synthesizes dynamic exploit PoCs using Nemotron-3-Ultra."""
 
     def __init__(self, client: Optional[NebiusNemotronClient] = None):
         self.client = client or NebiusNemotronClient(model=ModelTier.ULTRA.value)
 
-    def generate_exploit_poc(self, finding: SecurityFinding, source_code: str) -> SwarmAgentResult:
+    def generate_exploit_poc(
+        self, finding: SecurityFinding, source_code: str
+    ) -> SwarmAgentResult:
         cwe_key = finding.cwe if finding.cwe in EXPLOIT_TEMPLATES else "CWE-89"
         default_poc = EXPLOIT_TEMPLATES.get(cwe_key, EXPLOIT_TEMPLATES["CWE-89"])
 
@@ -57,7 +60,10 @@ Source Code:
 {source_code}
 """
         messages = [
-            {"role": "system", "content": "You are a Red Team exploit developer. Output pure executable Python PoC code enclosed in ```python ... ```."},
+            {
+                "role": "system",
+                "content": "You are a Red Team exploit developer. Output pure executable Python PoC code enclosed in ```python ... ```.",
+            },
             {"role": "user", "content": prompt},
         ]
         raw_output = self.client.chat_completion(messages)

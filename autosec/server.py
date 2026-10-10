@@ -2,7 +2,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import os
 import threading
-from typing import Optional
 
 COCKPIT_DATA = {
     "status": "ONLINE",
@@ -13,6 +12,7 @@ COCKPIT_DATA = {
     "consensus_voting": "ACTIVE",
     "formal_verification": "Z3/SMT BOUNDED",
 }
+
 
 class CockpitApiHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -35,6 +35,7 @@ class CockpitApiHandler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
 
 def start_cockpit_server(port: int = 8080) -> HTTPServer:
     server = HTTPServer(("0.0.0.0", port), CockpitApiHandler)

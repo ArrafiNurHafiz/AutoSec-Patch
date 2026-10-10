@@ -1,11 +1,11 @@
 """ClimateTrust AI Verification Engine: Orchestrates multi-agent auditing and adversarial detection."""
 
 from typing import List, Dict, Tuple
-from climatetrust.types import TelemetryPoint, AuditFinding, VerificationStatus
+from climatetrust.types import TelemetryPoint, AuditFinding
 from climatetrust.detector import (
     SpatialTemporalAnomalyDetector,
     AtmosphericPhysicsVerifier,
-    EntropyAndReplayDetector
+    EntropyAndReplayDetector,
 )
 
 
@@ -18,11 +18,10 @@ class ClimateTrustEngine:
         self.entropy_detector = EntropyAndReplayDetector()
 
     def audit_epoch(
-        self,
-        points: List[TelemetryPoint]
+        self, points: List[TelemetryPoint]
     ) -> Tuple[List[TelemetryPoint], List[TelemetryPoint], List[AuditFinding], float]:
         """Audit an entire epoch batch of telemetry points.
-        
+
         Returns:
             verified_points: Telemetry points confirmed clean and tamper-free.
             rejected_points: Telemetry points caught by adversarial verification.
@@ -37,7 +36,9 @@ class ClimateTrustEngine:
         all_findings.extend(self.entropy_detector.audit_entropy_and_flatlines(points))
 
         # Map findings per station
-        station_findings: Dict[str, List[AuditFinding]] = {p.station_id: [] for p in points}
+        station_findings: Dict[str, List[AuditFinding]] = {
+            p.station_id: [] for p in points
+        }
         for finding in all_findings:
             if finding.station_id in station_findings:
                 station_findings[finding.station_id].append(finding)

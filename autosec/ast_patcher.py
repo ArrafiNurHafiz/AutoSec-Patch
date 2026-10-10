@@ -1,12 +1,15 @@
 import ast
 import difflib
-from typing import Optional, Tuple, Dict, Any
+from typing import Tuple
+
 
 class AstSemanticPatcher:
     """Modifies Python AST nodes directly to produce guaranteed syntactically valid and precise patches."""
 
     @staticmethod
-    def patch_sqli_sqlite(source_code: str, target_func_name: str) -> Tuple[bool, str, str]:
+    def patch_sqli_sqlite(
+        source_code: str, target_func_name: str
+    ) -> Tuple[bool, str, str]:
         """Transform f-string / string concat SQL execution into parameterized query."""
         try:
             tree = ast.parse(source_code)
@@ -26,7 +29,10 @@ class AstSemanticPatcher:
                         # or cursor.execute(query)
                         if isinstance(stmt, ast.Assign):
                             for target in stmt.targets:
-                                if isinstance(target, ast.Name) and "query" in target.id.lower():
+                                if (
+                                    isinstance(target, ast.Name)
+                                    and "query" in target.id.lower()
+                                ):
                                     if isinstance(stmt.value, ast.JoinedStr):
                                         # Transform to static parameterized query
                                         raw_parts = []
@@ -35,7 +41,12 @@ class AstSemanticPatcher:
                                                 raw_parts.append(str(part.value))
                                             elif isinstance(part, ast.FormattedValue):
                                                 raw_parts.append("?")
-                                        query_str = "".join(raw_parts).replace("'{username}'", "?").replace("'{user_input}'", "?").replace("'", "")
+                                        query_str = (
+                                            "".join(raw_parts)
+                                            .replace("'{username}'", "?")
+                                            .replace("'{user_input}'", "?")
+                                            .replace("'", "")
+                                        )
                                         stmt.value = ast.Constant(value=query_str)
                                         self.modified = True
                         new_body.append(stmt)
@@ -61,7 +72,9 @@ class AstSemanticPatcher:
             return False, source_code, str(e)
 
     @staticmethod
-    def patch_command_injection(source_code: str, target_func_name: str) -> Tuple[bool, str, str]:
+    def patch_command_injection(
+        source_code: str, target_func_name: str
+    ) -> Tuple[bool, str, str]:
         """Convert shell=True and string concatenation into safe list-based subprocess execution."""
         try:
             tree = ast.parse(source_code)
@@ -79,7 +92,11 @@ class AstSemanticPatcher:
                         if isinstance(sub, ast.Call):
                             # Replace shell=True with shell=False
                             for kw in sub.keywords:
-                                if kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                                if (
+                                    kw.arg == "shell"
+                                    and isinstance(kw.value, ast.Constant)
+                                    and kw.value.value is True
+                                ):
                                     kw.value.value = False
                                     self.modified = True
                 return self.generic_visit(node)

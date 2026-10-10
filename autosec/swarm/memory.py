@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional
 import time
 
+
 @dataclass
 class MemoryRecord:
     memory_id: str
@@ -11,6 +12,7 @@ class MemoryRecord:
     exploit_payload_signature: str
     confidence: float
     timestamp: float = field(default_factory=time.time)
+
 
 class EpisodicSwarmMemory:
     """Persistent working memory for the multi-agent swarm to learn from past patch cycles."""
@@ -24,7 +26,7 @@ class EpisodicSwarmMemory:
         pattern_signature: str,
         successful_patch_strategy: str,
         exploit_payload_signature: str,
-        confidence: float = 0.95
+        confidence: float = 0.95,
     ) -> str:
         mem_id = f"mem_{cwe}_{int(time.time() * 1000)}"
         record = MemoryRecord(

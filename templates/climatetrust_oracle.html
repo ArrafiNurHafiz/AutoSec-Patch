@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClimateTrust AI Oracle - Cockpit Dashboard</title>
+    <!-- Leaflet Map CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#050505',
+                        fg: '#F3F3F3',
+                        border: '#333333',
+                        'accent-green': '#00FF41',
+                        'accent-red': '#FF003C',
+                        'accent-blue': '#0055FF',
+                        'accent-yellow': '#FFED00',
+                    },
+                    fontFamily: {
+                        mono: ['"SFMono-Regular"', 'Consolas', '"Liberation Mono"', 'Menlo', 'monospace'],
+                        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Specific overrides */
+        body { 
+            letter-spacing: 0.05em; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+        }
+        .data-mono {
+            font-family: var(--font-mono);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        #map { height: 350px; width: 100%; filter: grayscale(100%) invert(100%) contrast(150%); }
+    </style>
+</head>
+<body class="bg-bg text-fg font-sans p-8 leading-snug">
+    <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Sidebar -->
+        <div class="flex flex-col col-span-1">
+            <div class="text-[3vw] lg:text-4xl leading-[0.9] font-bold tracking-tight mb-6 border-b-2 border-fg pb-4">
+                CLIMATE<br/>TRUST<br/>ORACLE
+            </div>
+            
+            <div class="bg-[#0A0A0A] border border-border mb-8">
+                <div class="bg-black border-b border-border p-3 flex justify-between items-center font-bold">
+                    <span>System Identity</span>
+                </div>
+                <div class="p-4 font-mono text-[10px] text-gray-500 leading-relaxed uppercase">
+                    VERSION: 2.0.0-RC1 (ClimateChain 2026)<br/>
+                    NETWORK: ETHEREUM SEPOLIA<br/>
+                    PROTOCOL: ZK-SNARK / ERC-20
+                </div>
+            </div>
+
+            <div class="bg-[#0A0A0A] border border-border mb-8">
+                <div class="bg-black border-b border-border p-3 flex justify-between items-center font-bold">
+                    <span>Telemetry Stats</span>
+                </div>
+                <div class="p-4 border-b border-border">
+                    <div class="text-gray-500 mb-2">Total Nodes</div>
+                    <div class="text-3xl font-mono">__TOTAL_SAMPLES__</div>
+                </div>
+                <div class="p-4 border-b border-border">
+                    <div class="text-gray-500 mb-2">Verified</div>
+                    <div class="text-3xl font-mono text-accent-green">__VERIFIED_SAMPLES__</div>
+                </div>
+                <div class="p-4 border-b border-border">
+                    <div class="text-gray-500 mb-2">Quarantined</div>
+                    <div class="text-3xl font-mono text-accent-red">__REJECTED_SAMPLES__</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-gray-500 mb-2">Integrity</div>
+                    <div class="text-3xl font-mono" style="color: __SCORE_COLOR__">__SCORE_PCT__%</div>
+                </div>
+            </div>
+            
+            <button id="btnConnectWallet" class="w-full bg-transparent text-fg border border-fg py-2 px-4 font-mono text-[11px] uppercase cursor-pointer hover:bg-fg hover:text-bg transition-colors duration-200">Connect Wallet</button>
+            <div id="walletAddress" class="bg-[#0A0A0A] border border-accent-green font-mono text-accent-green text-center p-3 mt-4 hidden"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-span-1 lg:col-span-3 flex flex-col">
+            
+            <div class="bg-[#0A0A0A] border border-border mb-8">
+                <div class="bg-black border-b border-border p-3 flex justify-between items-center font-bold">
+                    <span>Geospatial Array</span>
+                    <span class="border border-border px-2 py-1 font-mono text-[10px]">Live</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Telemetry Stream -->
+                <div class="bg-[#0A0A0A] border border-border">
+                    <div class="bg-black border-b border-border p-3 font-bold"><span>Data Stream</span></div>
+                    <div class="max-h-[300px] overflow-y-auto">
+                        <table class="w-full text-left font-mono text-[12px] normal-case">
+                            <thead>
+                                <tr>
+                                    <th class="p-3 border-b border-border text-gray-500 font-sans text-[10px] uppercase font-bold">ID</th>
+                                    <th class="p-3 border-b border-border text-gray-500 font-sans text-[10px] uppercase font-bold">CO2</th>
+                                    <th class="p-3 border-b border-border text-gray-500 font-sans text-[10px] uppercase font-bold">CH4</th>
+                                    <th class="p-3 border-b border-border text-gray-500 font-sans text-[10px] uppercase font-bold">PM2.5</th>
+                                    <th class="p-3 border-b border-border text-gray-500 font-sans text-[10px] uppercase font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                __TELEMETRY_ROWS__
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Threat Intel -->
+                <div class="bg-[#0A0A0A] border border-border">
+                    <div class="bg-black border-b border-border p-3 flex justify-between items-center font-bold">
+                        <span>Adversarial Forensics</span>
+                        <span class="border border-accent-red text-accent-red px-2 py-1 font-mono text-[10px]">__FINDINGS_COUNT__ Detected</span>
+                    </div>
+                    <div class="p-4 max-h-[300px] overflow-y-auto space-y-4">
+                        __FINDINGS_ROWS__
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cryptographic Ledger -->
+            <div class="bg-[#0A0A0A] border border-border mb-8">
+                <div class="bg-black border-b border-border p-3 font-bold"><span>Cryptographic Attestation Ledger</span></div>
+                <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex justify-between py-2 border-b border-dashed border-border font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Status</span> <span class="text-accent-green">__TX_STATUS__</span></div>
+                        <div class="flex justify-between py-2 border-b border-dashed border-border font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Epoch</span> <span>__EPOCH_ID__</span></div>
+                        <div class="flex justify-between py-2 border-b border-dashed border-border font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Merkle Root</span> <span>__MERKLE_ROOT__</span></div>
+                        <div class="flex justify-between py-2 border-b border-dashed border-border font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Signature</span> <span>__SIGNATURE__</span></div>
+                        <div class="flex justify-between py-2 border-b border-dashed border-border font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Tx Hash</span> <span>__TX_HASH__</span></div>
+                        <div class="flex justify-between py-2 font-mono normal-case text-sm"><span class="text-gray-500 uppercase font-sans text-[10px] font-bold">Block</span> <span>#__BLOCK_NUMBER__</span></div>
+                    </div>
+                    <div class="flex flex-col-reverse items-center gap-4 py-6" id="merkleVis">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Events -->
+            <div class="bg-[#0A0A0A] border border-border">
+                <div class="bg-black border-b border-border p-3 flex justify-between items-center font-bold">
+                    <span>Live Network Log (WSS)</span>
+                    <span class="border border-gray-500 text-gray-500 px-2 py-1 font-mono text-[10px]" id="wsStatus">INIT</span>
+                </div>
+                <div class="max-h-[200px] overflow-y-auto bg-black">
+                    <table class="w-full text-left font-mono text-[12px] normal-case">
+                        <tbody id="wsLog"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const telemetryData = __TELEMETRY_JSON__;
+        const merkleRoot = "__MERKLE_ROOT__";
+        
+        // Wallet
+        document.getElementById('btnConnectWallet').addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('walletAddress').style.display = 'block';
+            document.getElementById('walletAddress').innerText = "CONNECTED: 0x" + Math.random().toString(16).slice(2,10) + "..." + Math.random().toString(16).slice(2,6);
+        });
+
+        // Map
+        const map = L.map('map', { zoomControl: false }).setView([0, 0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        const bounds = [];
+        telemetryData.forEach(p => {
+            if (p.latitude && p.longitude) {
+                const isRejected = p.attack_injected !== 'none';
+                const color = isRejected ? '#FF003C' : '#00FF41';
+                const icon = L.divIcon({
+                    html: `<div style="background:${color}; width:8px; height:8px; border-radius:0;"></div>`,
+                    className: '',
+                    iconSize: [8, 8],
+                    iconAnchor: [4, 4]
+                });
+                L.marker([p.latitude, p.longitude], {icon: icon}).addTo(map);
+                bounds.push([p.latitude, p.longitude]);
+            }
+        });
+        if (bounds.length > 0) map.fitBounds(bounds, {padding: [50, 50]});
+
+        // Merkle Visualizer
+        const mVis = document.getElementById('merkleVis');
+        const validSamples = telemetryData.filter(p => p.attack_injected === 'none');
+        
+        const l1 = document.createElement('div'); l1.className = 'flex gap-4 justify-center';
+        const l2 = document.createElement('div'); l2.className = 'flex gap-4 justify-center';
+        const l3 = document.createElement('div'); l3.className = 'flex gap-4 justify-center';
+
+        const rootNode = document.createElement('div');
+        rootNode.className = 'border border-accent-green bg-black p-2 font-mono text-[10px] text-accent-green cursor-pointer';
+        rootNode.innerText = "ROOT:" + merkleRoot.substring(0,8);
+        l3.appendChild(rootNode);
+
+        const intNodes = [];
+        for(let i=0; i<2; i++) {
+            const node = document.createElement('div');
+            node.className = 'border border-border bg-black p-2 font-mono text-[10px] text-gray-500 cursor-pointer hover:border-fg hover:text-fg';
+            node.innerText = "H:" + Math.random().toString(16).slice(2,10);
+            intNodes.push(node);
+            l2.appendChild(node);
+        }
+
+        validSamples.slice(0,4).forEach((s, i) => {
+            const leaf = document.createElement('div');
+            leaf.className = 'border border-border bg-black p-2 font-mono text-[10px] text-gray-500 cursor-pointer hover:border-fg hover:text-fg';
+            leaf.innerText = s.station_id.substring(0,8);
+            leaf.addEventListener('click', () => {
+                document.querySelectorAll('.border-fg').forEach(n => { n.classList.remove('border-fg', 'text-fg'); n.classList.add('border-border', 'text-gray-500'); });
+                
+                // Add active styles to clicked elements
+                const activateNode = (n) => { n.classList.remove('border-border', 'text-gray-500'); n.classList.add('border-fg', 'text-fg'); };
+                activateNode(leaf);
+                // rootNode is already highlighted as root, but we can make it active
+                rootNode.classList.remove('border-accent-green', 'text-accent-green');
+                rootNode.classList.add('border-fg', 'text-fg');
+                activateNode(intNodes[Math.floor(i/2)]);
+            });
+            l1.appendChild(leaf);
+        });
+
+        mVis.appendChild(l1);
+        mVis.appendChild(l2);
+        mVis.appendChild(l3);
+
+        // WebSockets
+        const wsLog = document.getElementById('wsLog');
+        const wsStatus = document.getElementById('wsStatus');
+        
+        function logWs(type, msg, color) {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-[#111]";
+            const time = new Date().toISOString().substring(11, 23);
+            tr.innerHTML = `<td class="p-3 border-b border-border text-gray-500 w-[120px]">${time}</td><td class="p-3 border-b border-border w-[120px]" style="color:${color};">${type}</td><td class="p-3 border-b border-border font-mono normal-case text-[#CCC]">${msg}</td>`;
+            wsLog.prepend(tr);
+        }
+
+        setTimeout(() => {
+            wsStatus.innerText = "LIVE";
+            wsStatus.className = "border border-accent-green text-accent-green px-2 py-1 font-mono text-[10px]";
+            logWs("SYS", "WSS Handshake Established", "#888");
+            setTimeout(() => logWs("ZK-PROOF", "Synthesizing constraint system for valid spatial bounds", "#0055FF"), 1000);
+            setTimeout(() => logWs("IPFS", "Pinned payload. CID: QmXy...Z8p", "#F3F3F3"), 2500);
+            setTimeout(() => logWs("ERC-20", "Minting 100 VCC. Integrity threshold met.", "var(--accent-green)"), 4000);
+        }, 500);
+
+    </script>
+</body>
+</html>

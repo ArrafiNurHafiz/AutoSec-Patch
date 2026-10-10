@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
 from autosec.types import SecurityFinding
+
 
 @dataclass
 class RiskProfile:
@@ -10,6 +10,7 @@ class RiskProfile:
     reachability_depth: int
     is_externally_reachable: bool
     priority_level: str
+
 
 class DynamicRiskPrioritizer:
     """Computes Composite Risk Score = 0.4*CVSS + 0.3*(EPSS*10) + 0.3*(Reachability*10)."""
@@ -24,17 +25,18 @@ class DynamicRiskPrioritizer:
 
     @classmethod
     def calculate_risk(
-        cls,
-        finding: SecurityFinding,
-        call_depth: int = 1,
-        epss_score: float = 0.65
+        cls, finding: SecurityFinding, call_depth: int = 1, epss_score: float = 0.65
     ) -> RiskProfile:
         cvss = cls.DEFAULT_CVSS_MAP.get(str(finding.severity).upper(), 7.5)
         # Normalize reachability (depth 1-3 = high reachability)
-        reachability_norm = 1.0 if call_depth <= 2 else (0.6 if call_depth <= 4 else 0.2)
-        
-        composite = (0.4 * cvss) + (0.3 * (epss_score * 10)) + (0.3 * (reachability_norm * 10))
-        
+        reachability_norm = (
+            1.0 if call_depth <= 2 else (0.6 if call_depth <= 4 else 0.2)
+        )
+
+        composite = (
+            (0.4 * cvss) + (0.3 * (epss_score * 10)) + (0.3 * (reachability_norm * 10))
+        )
+
         if composite >= 8.5:
             priority = "P0 - IMMEDIATE BLOCKER"
         elif composite >= 6.5:

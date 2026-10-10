@@ -1,11 +1,9 @@
+import os
 import subprocess
 import tempfile
-import os
-import shutil
-from typing import Tuple, Optional
-from autosec.types import SwarmAgentResult, ModelTier
+from typing import Tuple
 from autosec.runner import apply_patch, run_tests
-from autosec.sandbox import EnterpriseWorktreeSandbox
+
 
 class DualVerifierAgent:
     """Evaluates patches against both functional regression and Red Team exploit PoCs in sandbox."""
@@ -14,11 +12,7 @@ class DualVerifierAgent:
         self.name = "DualVerifier-Oracle"
 
     def verify_remediation(
-        self,
-        repo_path: str,
-        patch_diff: str,
-        poc_code: str,
-        regression_cmd: str
+        self, repo_path: str, patch_diff: str, poc_code: str, regression_cmd: str
     ) -> Tuple[bool, bool, str]:
         """Returns: (is_secure, is_functional, log_details)"""
         # 1. Apply Patch
@@ -57,7 +51,9 @@ if __name__ == '__main__':
                 poc_file = tf.name
 
             try:
-                res = subprocess.run(["python3", poc_file], capture_output=True, text=True, timeout=15)
+                res = subprocess.run(
+                    ["python3", poc_file], capture_output=True, text=True, timeout=15
+                )
                 poc_log = (res.stdout + "\n" + res.stderr).strip()
                 if res.returncode != 0 and "VULNERABLE:" in poc_log:
                     is_secure = False

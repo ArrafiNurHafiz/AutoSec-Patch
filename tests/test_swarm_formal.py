@@ -7,6 +7,7 @@ from autosec.server import start_cockpit_server
 import urllib.request
 import json
 
+
 class TestSwarmAndFormalEngine(unittest.TestCase):
     def test_episodic_memory_and_consensus(self):
         memory = EpisodicSwarmMemory()
@@ -19,7 +20,7 @@ class TestSwarmAndFormalEngine(unittest.TestCase):
             start_line=1,
             end_line=2,
             cwe="CWE-89",
-            severity=FindingSeverity.CRITICAL
+            severity=FindingSeverity.CRITICAL,
         )
 
         verdict = consensus.adjudicate_patch(
@@ -27,12 +28,12 @@ class TestSwarmAndFormalEngine(unittest.TestCase):
             candidate_patch="diff --git ...",
             is_secure=True,
             is_regression_clean=True,
-            blast_radius_nodes=["get_user"]
+            blast_radius_nodes=["get_user"],
         )
 
         self.assertTrue(verdict.approved)
         self.assertGreaterEqual(verdict.approval_rate, 0.75)
-        
+
         # Verify memory storage
         recalled = memory.recall_similar_fix("CWE-89")
         self.assertIsNotNone(recalled)
@@ -57,6 +58,8 @@ class TestSwarmAndFormalEngine(unittest.TestCase):
             self.assertEqual(data["immunity_rate"], 100.0)
         finally:
             server.shutdown()
+            server.server_close()
+
 
 if __name__ == "__main__":
     unittest.main()

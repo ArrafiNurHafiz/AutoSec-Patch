@@ -1,5 +1,8 @@
+import logging
 import os
 from typing import List, Optional
+
+logger = logging.getLogger(__name__)
 from autosec.types import SecurityFinding, RemediationResult, SwarmAgentResult
 from autosec.parser import parse_sarif_or_json
 from autosec.ast_analyzer import SemanticGraphAnalyzer
@@ -11,10 +14,16 @@ from autosec.client import NebiusNemotronClient
 from autosec.sandbox import WorktreeSandbox
 from autosec.runner import apply_patch
 
+
 class CoEvolutionEngine:
     """Orchestrates the Red-Blue adversarial co-evolution loop with isolated worktrees and taint paths."""
 
-    def __init__(self, repo_path: str = ".", max_iterations: int = 3, client: Optional[NebiusNemotronClient] = None):
+    def __init__(
+        self,
+        repo_path: str = ".",
+        max_iterations: int = 3,
+        client: Optional[NebiusNemotronClient] = None,
+    ):
         self.repo_path = os.path.abspath(repo_path)
         self.max_iterations = max_iterations
         self.client = client or NebiusNemotronClient()
@@ -23,7 +32,11 @@ class CoEvolutionEngine:
         self.blue_agent = BlueTeamAgent(self.client)
         self.verifier = DualVerifierAgent()
 
-    def process_sarif(self, sarif_path: str, test_cmd: str = "python3 -m unittest examples/test_vulnerable.py") -> List[RemediationResult]:
+    def process_sarif(
+        self,
+        sarif_path: str,
+        test_cmd: str = "python3 -m unittest examples/test_vulnerable.py",
+    ) -> List[RemediationResult]:
         findings_raw = parse_sarif_or_json(sarif_path)
         results: List[RemediationResult] = []
 
@@ -55,7 +68,19 @@ class CoEvolutionEngine:
             timeline: List[SwarmAgentResult] = []
 
             # 2. Red Team Exploit Synthesis
-            red_res = self.red_agent.generate_exploit_poc(f_sec, source_code)
+            try:
+                red_res = self.red_agent.generate_exploit_poc(f_sec, source_code)
+            except Exception as e:
+                logger.error(
+                    "Red team exploit synthesis failed: %s. Using fallback PoC.", e
+                )
+                red_res = SwarmAgentResult(
+                    agent_name="RedTeam-ExploitSynthesizer",
+                    model_used=self.client.model,
+                    status="FALLBACK",
+                    output="# Fallback PoC: Exploit synthesis unavailable\ndef run_exploit(f):\n    return False, 'Unavailable'\n",
+                    token_usage={"prompt": 0, "completion": 0},
+                )
             timeline.append(red_res)
 
             final_patch = ""
@@ -66,7 +91,24 @@ class CoEvolutionEngine:
             # 3. Isolated Worktree Sandbox Verification Loop
             with WorktreeSandbox(self.repo_path) as sandbox_path:
                 for it in range(1, self.max_iterations + 1):
-                    blue_res = self.blue_agent.synthesize_patch(f_sec, source_code, blast_radius, adversarial_feedback=feedback)
+                    try:
+                        blue_res = self.blue_agent.synthesize_patch(
+                            f_sec,
+                            source_code,
+                            blast_radius,
+                            adversarial_feedback=feedback,
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "Blue team patch synthesis failed: %s. Using fallback.", e
+                        )
+                        blue_res = SwarmAgentResult(
+                            agent_name="BlueTeam-PatchSynthesizer",
+                            model_used=self.client.model,
+                            status="FALLBACK",
+                            output="",
+                            token_usage={"prompt": 0, "completion": 0},
+                        )
                     timeline.append(blue_res)
                     final_patch = blue_res.output
 
@@ -82,7 +124,9 @@ class CoEvolutionEngine:
                             verified_secure = True
                             regression_passed = True
                             break
-                        feedback = f"Iteration {it} Failed in Sandbox. Details: {details}"
+                        feedback = (
+                            f"Iteration {it} Failed in Sandbox. Details: {details}"
+                        )
 
             # Apply verified patch back to main repo
             if verified_secure and regression_passed and final_patch:
@@ -91,7 +135,9 @@ class CoEvolutionEngine:
             results.append(
                 RemediationResult(
                     finding=f_sec,
-                    initial_patch=timeline[1].output if len(timeline) > 1 else final_patch,
+                    initial_patch=(
+                        timeline[1].output if len(timeline) > 1 else final_patch
+                    ),
                     final_patch=final_patch,
                     iterations=len([t for t in timeline if "BlueTeam" in t.agent_name]),
                     verified_secure=verified_secure,

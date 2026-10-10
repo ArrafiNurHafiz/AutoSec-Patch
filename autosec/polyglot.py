@@ -1,14 +1,44 @@
-import ast
 import re
-from typing import Dict, List, Set, Optional, Tuple
+from typing import List
+
 
 class PolyglotTaintAnalyzer:
     """Multi-language sink and scope analyzer (Python AST + JS/TS/Go Regex)."""
 
     LANG_SINKS = {
-        "python": {"execute", "executemany", "raw", "run", "Popen", "system", "open", "eval", "exec"},
-        "javascript": {"eval", "exec", "query", "raw", "execSync", "spawn", "readFile", "writeFileSync", "innerHTML"},
-        "typescript": {"eval", "exec", "query", "raw", "execSync", "spawn", "readFile", "writeFileSync", "innerHTML"},
+        "python": {
+            "execute",
+            "executemany",
+            "raw",
+            "run",
+            "Popen",
+            "system",
+            "open",
+            "eval",
+            "exec",
+        },
+        "javascript": {
+            "eval",
+            "exec",
+            "query",
+            "raw",
+            "execSync",
+            "spawn",
+            "readFile",
+            "writeFileSync",
+            "innerHTML",
+        },
+        "typescript": {
+            "eval",
+            "exec",
+            "query",
+            "raw",
+            "execSync",
+            "spawn",
+            "readFile",
+            "writeFileSync",
+            "innerHTML",
+        },
         "go": {"Exec", "Query", "QueryRow", "Command", "Open", "ReadFile"},
     }
 
@@ -32,5 +62,7 @@ class PolyglotTaintAnalyzer:
         for line_no, line in enumerate(source_code.splitlines(), 1):
             for sink in sinks:
                 if re.search(rf"\b{sink}\b", line):
-                    detected.append(f"Line {line_no}: Sink '{sink}' -> {line.strip()[:60]}")
+                    detected.append(
+                        f"Line {line_no}: Sink '{sink}' -> {line.strip()[:60]}"
+                    )
         return detected

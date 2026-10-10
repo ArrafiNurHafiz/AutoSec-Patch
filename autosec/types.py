@@ -2,10 +2,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Dict, Any, Optional
 
+
 class ModelTier(str, Enum):
     NANO = "nvidia/llama-3.1-nemotron-nano"
     SUPER = "nvidia/llama-3.1-nemotron-70b-instruct"
     ULTRA = "nvidia/nemotron-3-ultra"
+
 
 class FindingSeverity(str, Enum):
     CRITICAL = "CRITICAL"
@@ -13,6 +15,7 @@ class FindingSeverity(str, Enum):
     MEDIUM = "MEDIUM"
     LOW = "LOW"
     INFO = "INFO"
+
 
 @dataclass
 class SecurityFinding:
@@ -27,14 +30,18 @@ class SecurityFinding:
     taint_source: Optional[str] = None
     taint_sink: Optional[str] = None
 
+
 @dataclass
 class SwarmAgentResult:
     agent_name: str
     model_used: str
     status: str
     output: Any
-    token_usage: Dict[str, int] = field(default_factory=lambda: {"prompt": 0, "completion": 0})
+    token_usage: Dict[str, int] = field(
+        default_factory=lambda: {"prompt": 0, "completion": 0}
+    )
     duration_ms: float = 0.0
+
 
 @dataclass
 class RemediationResult:

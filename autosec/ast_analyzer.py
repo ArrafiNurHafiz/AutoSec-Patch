@@ -1,13 +1,17 @@
 import ast
-from typing import Dict, List, Set, Optional, Tuple
+from typing import Dict, List, Set, Optional
+
 
 class TaintNode:
-    def __init__(self, name: str, lineno: int, is_source: bool = False, is_sink: bool = False):
+    def __init__(
+        self, name: str, lineno: int, is_source: bool = False, is_sink: bool = False
+    ):
         self.name = name
         self.lineno = lineno
         self.is_source = is_source
         self.is_sink = is_sink
         self.flows_to: Set[str] = set()
+
 
 class CodeGraphNode:
     def __init__(self, name: str, node_type: str, lineno: int, end_lineno: int):
@@ -19,13 +23,25 @@ class CodeGraphNode:
         self.called_by: Set[str] = set()
         self.parameters: List[str] = []
 
+
 class SemanticGraphAnalyzer:
     """Extracts AST Call Graphs, Scope Windows, Blast Radius, and Symbolic Taint Paths."""
 
     KNOWN_SINKS = {
-        "execute", "executemany", "raw",  # SQLi
-        "run", "Popen", "system", "check_output", "execv",  # Command Injection
-        "open", "read", "load", "loads", "eval", "exec"  # Path Traversal / Deserialization / Code Exec
+        "execute",
+        "executemany",
+        "raw",  # SQLi
+        "run",
+        "Popen",
+        "system",
+        "check_output",
+        "execv",  # Command Injection
+        "open",
+        "read",
+        "load",
+        "loads",
+        "eval",
+        "exec",  # Path Traversal / Deserialization / Code Exec
     }
 
     def __init__(self, source_code: str, file_path: str = ""):
@@ -51,7 +67,7 @@ class SemanticGraphAnalyzer:
                     end_lineno=node.end_lineno or node.lineno,
                 )
                 g_node.parameters = params
-                
+
                 # Register function params as taint sources
                 for p in params:
                     self.taint_graph[p] = TaintNode(p, node.lineno, is_source=True)
@@ -64,22 +80,31 @@ class SemanticGraphAnalyzer:
                             func_name = sub.func.id
                         elif isinstance(sub.func, ast.Attribute):
                             func_name = sub.func.attr
-                        
+
                         if func_name:
                             g_node.calls.add(func_name)
                             if func_name in self.KNOWN_SINKS:
                                 sink_key = f"sink_{func_name}_{sub.lineno}"
-                                self.taint_graph[sink_key] = TaintNode(sink_key, sub.lineno, is_sink=True)
+                                self.taint_graph[sink_key] = TaintNode(
+                                    sink_key, sub.lineno, is_sink=True
+                                )
 
                     # Assignment taint propagation
                     if isinstance(sub, ast.Assign):
                         for target in sub.targets:
                             if isinstance(target, ast.Name):
                                 var_name = target.id
-                                self.taint_graph[var_name] = TaintNode(var_name, sub.lineno)
+                                self.taint_graph[var_name] = TaintNode(
+                                    var_name, sub.lineno
+                                )
                                 for val_sub in ast.walk(sub.value):
-                                    if isinstance(val_sub, ast.Name) and val_sub.id in self.taint_graph:
-                                        self.taint_graph[val_sub.id].flows_to.add(var_name)
+                                    if (
+                                        isinstance(val_sub, ast.Name)
+                                        and val_sub.id in self.taint_graph
+                                    ):
+                                        self.taint_graph[val_sub.id].flows_to.add(
+                                            var_name
+                                        )
 
                 self.nodes[node.name] = g_node
 

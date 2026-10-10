@@ -1,7 +1,8 @@
 import subprocess
 import os
-from typing import Tuple, Optional
+from typing import Tuple
 from autosec.types import RemediationResult
+
 
 class GitHubShipper:
     """Automates branch creation, git commits, and GitHub Pull Request shipping for verified patches."""
@@ -9,15 +10,23 @@ class GitHubShipper:
     def __init__(self, repo_path: str = "."):
         self.repo_path = os.path.abspath(repo_path)
 
-    def create_remediation_pull_request(self, result: RemediationResult) -> Tuple[bool, str]:
-        branch_name = f"autosec/remediate-{result.finding.rule_id.replace('.', '-').lower()}"
-        
+    def create_remediation_pull_request(
+        self, result: RemediationResult
+    ) -> Tuple[bool, str]:
+        branch_name = (
+            f"autosec/remediate-{result.finding.rule_id.replace('.', '-').lower()}"
+        )
+
         # 1. Create and checkout remediation branch
-        subprocess.run(["git", "checkout", "-B", branch_name], cwd=self.repo_path, capture_output=True)
-        
+        subprocess.run(
+            ["git", "checkout", "-B", branch_name],
+            cwd=self.repo_path,
+            capture_output=True,
+        )
+
         # 2. Stage changes
         subprocess.run(["git", "add", "."], cwd=self.repo_path, capture_output=True)
-        
+
         # 3. Commit with AppSec audit rationale
         commit_msg = (
             f"security({result.finding.cwe or 'CVE'}): autonomous patch for {result.finding.rule_id}\n\n"
@@ -28,8 +37,13 @@ class GitHubShipper:
             f"- Verified Secure: {result.verified_secure}\n"
             f"- Regression Passed: {result.regression_passed}"
         )
-        res_commit = subprocess.run(["git", "commit", "-m", commit_msg], cwd=self.repo_path, capture_output=True, text=True)
-        
+        res_commit = subprocess.run(
+            ["git", "commit", "-m", commit_msg],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True,
+        )
+
         # 4. Attempt gh pr create if gh is authenticated
         pr_body = (
             f"## 🛡️ AutoSec-Patch Autonomous Remediation\n\n"
@@ -43,15 +57,23 @@ class GitHubShipper:
             f"- ✅ **Regression Suite**: 100% Passed\n"
             f"- ⚡ **Inference Engine**: NVIDIA Nemotron on Nebius Token Factory\n"
         )
-        
+
         gh_cmd = [
-            "gh", "pr", "create",
-            "--title", f"fix(sec): autonomous remediation for {result.finding.rule_id}",
-            "--body", pr_body,
-            "--head", branch_name,
-            "--base", "main"
+            "gh",
+            "pr",
+            "create",
+            "--title",
+            f"fix(sec): autonomous remediation for {result.finding.rule_id}",
+            "--body",
+            pr_body,
+            "--head",
+            branch_name,
+            "--base",
+            "main",
         ]
-        res_pr = subprocess.run(gh_cmd, cwd=self.repo_path, capture_output=True, text=True)
+        res_pr = subprocess.run(
+            gh_cmd, cwd=self.repo_path, capture_output=True, text=True
+        )
         if res_pr.returncode == 0:
             return True, f"PR Created Successfully: {res_pr.stdout.strip()}"
         return True, f"Local remediation branch '{branch_name}' prepared and committed."
